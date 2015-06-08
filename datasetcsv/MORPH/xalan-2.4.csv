@@ -1,4 +1,4 @@
-name,version,name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
+?name,?version,?name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
 xalan,2.4.0,org.apache.xalan.xsltc.runtime.output.SAXXMLOutput,16,3,0,6,52,112,1,5,11,0.777777778,509,1,0,0.74,0.344444444,2,8,30.625,1,0.8125,0
 xalan,2.4.0,org.apache.xpath.operations.Operation,12,2,14,23,23,0,17,8,12,0.363636364,149,1,2,0.731707317,0.21875,1,7,11.25,5,1.5833,0
 xalan,2.4.0,org.apache.xalan.xsltc.runtime.BasisLibrary,53,1,0,34,150,1362,22,15,49,1.001602564,2089,0.375,0,0,0.125,0,0,37.96226415,49,4.3962,1

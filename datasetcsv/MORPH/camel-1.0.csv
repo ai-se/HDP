@@ -1,4 +1,4 @@
-name,version,name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
+?name,?version,?name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
 camel,1,org.apache.camel.component.quartz.QuartzExchange,4,2,0,6,8,6,2,5,4,2,26,0,0,0.896551724,0.5,0,0,5.5,1,0.75,0
 camel,1,org.apache.camel.component.mina.MinaComponent,6,3,0,21,33,15,1,21,2,2,176,0,0,0.8,0.5,2,2,28.33333333,1,0.6667,0
 camel,1,org.apache.camel.processor.loadbalancer.RandomLoadBalancer,2,3,0,3,7,1,0,3,1,2,24,0,0,0.833333333,0.666666667,1,1,11,1,0.5,0

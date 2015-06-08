@@ -1,4 +1,4 @@
-name,version,name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
+?name,?version,?name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
 ArcPlatform,1,pl.arcilook.controller.JabberAccountController,7,1,0,6,19,7,0,6,6,0.75,117,1,2,0,0.366666667,0,0,15.14285714,3,1.1429,0
 ArcPlatform,1,pl.arcilook.controller.settings.TaskControllerSettingsImpl,13,1,0,1,17,64,0,1,12,0.916666667,117,1,0,0,0.461538462,0,0,7.461538462,3,1.3846,0
 ArcPlatform,1,pl.arcilook.exception.ServiceLogicException,7,4,4,48,12,19,47,1,6,0.944444444,44,0.333333333,0,0.866666667,0.458333333,0,0,4.857142857,1,0.2857,0

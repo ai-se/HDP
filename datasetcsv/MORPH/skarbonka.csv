@@ -1,4 +1,4 @@
-name,version,name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
+?name,?version,?name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
 Skarbonka,1,skarbonka.raports.GenerateSummaryCostInterface,10,1,0,4,10,45,2,2,10,2,10,0,0,0,0.271428571,0,0,0,1,1,0
 Skarbonka,1,skarbonka.IncomeControlerInterface,1,1,0,3,1,0,2,1,1,2,1,0,0,0,1,0,0,0,1,1,0
 Skarbonka,1,skarbonka.raports.RaportsJPanel,12,5,0,14,67,60,4,13,5,0.761363636,772,1,0,0.976987448,0.35,0,0,62,1,0.9167,0

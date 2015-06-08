@@ -1,4 +1,4 @@
-name,version,name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
+?name,?version,?name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
 Redaktor,1,redaktor.util.Util,13,1,0,18,47,0,17,1,10,0.541666667,803,1,0,0,0.2,0,0,60.61538462,5,2.6154,0
 Redaktor,1,redaktor.web.dispatch.actions.article.EditArticleForm,6,2,0,22,50,0,1,21,2,1.066666667,367,0.222222222,0,0.857142857,0.5,1,11,58.66666667,3,1.6667,1
 Redaktor,1,redaktor.web.SessionKeys,0,1,0,0,0,0,0,0,0,2,3,0,0,0,0,0,0,0,0,0,0

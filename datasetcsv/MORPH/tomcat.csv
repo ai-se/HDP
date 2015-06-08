@@ -1,4 +1,4 @@
-name,version,name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
+?name,?version,?name,wmc,dit,noc,cbo,rfc,lcom,ca,ce,npm,lcom3,loc,dam,moa,mfa,cam,ic,cbm,amc,max_cc,avg_cc,bug
 Tomcat,6.0.389418,org.apache.coyote.http11.filters.VoidOutputFilter,8,1,0,6,14,26,2,0,7,1,39,1,2,0,0.392857143,0,0,3.5,1,0.75,0
 Tomcat,6.0.389418,org.apache.el.parser.AstGreaterThan,2,4,0,4,5,1,1,0,2,2,36,0,0,0.975609756,0.666666667,1,1,17,1,0.5,0
 Tomcat,6.0.389418,org.apache.coyote.Request,56,1,0,49,89,1310,40,0,56,0.956473829,583,1,24,0,0.1375,0,0,8.821428571,5,1.1964,0
