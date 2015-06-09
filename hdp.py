@@ -7,10 +7,13 @@ from os import listdir
 from os.path import isfile, join
 from scipy import stats
 import numpy as np
+import operator
 
 
 class o:
-  def __init__(i, **d): i.__dict__.update(d)
+  def __init__(i, **d): i.update(**d)
+
+  def update(i, **d): i.__dict__.update(d); return i
 
   def __getitem__(i, k): return i.__dict__[k]
 
@@ -55,16 +58,54 @@ def read(src="./datasetcsv"):
   return data
 
 
+def transform(d):
+  col = {}
+  for row in d["data"]:
+    for attr, cell in zip(d["attr"][:-1],row[:-1]): # exclude last columm, $bug
+      col[attr] = col.get(attr,[]) + [cell]
+  return col
+
+def maximumWeighted(match, top):
+  metrics =sorted(match.items(), key = operator.itemgetter(1), reverse=True)
+  value,count = 0, 0
+  attr_source, attr_target = [],[]
+  for a in metrics:
+    if count < top: # select top 15% features
+      if a[0][0] not in attr_source and a[0][1] not in attr_target:
+        value += a[-1]
+        attr_source.append(a[0][0])
+        attr_target.append(a[0][1])
+        count +=1
+  return o(score = value,attr_source = attr_source, attr_target = attr_target)
+
+
+
+def KStest(d1,d2,cutoff = 0.05):
+  match = {}
+  source = transform(d1)
+  target = transform(d2)
+  for key1,val1 in source.iteritems():
+    for key2,val2 in target.iteritems():
+      result = stats.ks_2samp(np.array(val1), np.array(val2)) #(a,b): b is p-value, zero means significantly different
+      if result[1] >= cutoff:
+        match[(key1,key2)] =result[1]
+  return maximumWeighted(match, int(len(source)*0.15))
+
+
+
+
 
 
 def KSanalyzer():
   data = read()
-  pdb.set_trace()
   for key, val in data.iteritems():
     for key1, val1 in data.iteritems():
-      if key != key:
+      if key != key1:
         for one in val:
           for one1 in val1:
+            X = KStest(one, one1).update(name_source = one["name"], name_target = one1["name"] )
+            pdb.set_trace()
+            print(X)
 
 
 
