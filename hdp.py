@@ -5,17 +5,22 @@ import random
 from os import listdir
 from os.path import isfile, join
 import operator
-
+from sklearn.linear_model import LogisticRegression
 from scipy import stats
 import numpy as np
 
 
 class o:
-  def __init__(i, **d): i.update(**d)
+  ID = 0
+  def __init__(i, **d):
+    o.ID = i.id = o.ID+1
+    i.update(**d)
 
   def update(i, **d): i.__dict__.update(d); return i
 
   def __getitem__(i, k): return i.__dict__[k]
+
+  def __hash__(i): return i.id
 
   def __repr__(i):
     keys = [k for k in sorted(i.__dict__.keys()) if k[0] is not "_"]
@@ -113,14 +118,45 @@ def KSanalyzer(data = read()):
       best_pairs.append(temp_best)
   return best_pairs
 
+def prepareData(train,test):
+  train_x = [t[:-1] for t in train]
+  train_y = [(t[-1]) for t in train]
+  test_x = [t[:-1] for t in test]
+  test_y = [(t[-1]) for t in test]
+  return [train_x, train_y, test_x, test_y]
+
+
+def learner(d):
+  train_x,train_y, test_x,test_y = d[0],d[1], d[2],d[3]
+  lr = LogisticRegression()
+  clf = lr.fit(train_x,train_y)
+  result = clf.predict(test_x)
+  pdb.set_trace()
+  return result
+
 def wpdp(data = read()):
+  for key, val in data.iteritems():
+    for one in val:
+      for _ in xrange(500):
+        instances = one["data"]
+        random.shuffle(instances)
+        cut = int(len(instances)*0.5)
+        A = instances[:cut]
+        B = instances[cut:]
+        re = learner(prepareData(A,B))
+        pdb.set_trace()
+        print(re)
+
+
+
   pass
 
 
 if __name__ == "__main__":
   random.seed(1)
   np.random.seed(1)
-  KSanalyzer()
+  wpdp()
+  # KSanalyzer()
 
 
 
