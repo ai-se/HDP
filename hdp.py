@@ -93,12 +93,12 @@ def KStest(d1, d2, cutoff=0.05):
   return maximumWeighted(match, int(len(source) * 0.15))
 
 
-def KSanalyzer():
+def KSanalyzer(data = read()):
   """
   for each target data set, find a best source data set in terms of p-values
   """
-  data = read()
-  best = []
+  # data = read()
+  best_pairs = []
   for key, val in data.iteritems():
     for target in val:
       temp_score = 0
@@ -110,7 +110,11 @@ def KSanalyzer():
             if X["score"] > temp_score:
               temp_score = X["score"]
               temp_best = X
-      best.append(temp_best)
+      best_pairs.append(temp_best)
+  return best_pairs
+
+def wpdp(data = read()):
+  pass
 
 
 if __name__ == "__main__":
