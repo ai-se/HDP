@@ -94,15 +94,23 @@ def KStest(d1, d2, cutoff=0.05):
 
 
 def KSanalyzer():
+  """
+  for each target data set, find a best source data set in terms of p-values
+  """
   data = read()
+  best = []
   for key, val in data.iteritems():
     for target in val:
+      temp_score = 0
+      temp_best = None
       for key1, val1 in data.iteritems():
         if key != key1:
           for source in val1:
             X = KStest(source, target).update(name_source=source["name"], name_target=target["name"])
-            pdb.set_trace()
-            print(X)
+            if X["score"] > temp_score:
+              temp_score = X["score"]
+              temp_best = X
+      best.append(temp_best)
 
 
 if __name__ == "__main__":
