@@ -6,6 +6,8 @@ from os import listdir
 from os.path import isfile, join
 import operator
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import auc
+from sklearn.metrics import roc_curve, roc_auc_score
 from scipy import stats
 import numpy as np
 
@@ -128,28 +130,34 @@ def prepareData(train,test):
 
 def learner(d):
   train_x,train_y, test_x,test_y = d[0],d[1], d[2],d[3]
+  train_y = [1  if i == "buggy"  else 0 for i in d[1]]
+  test_y = [1  if i == "buggy"  else 0 for i in d[3]]
   lr = LogisticRegression()
   clf = lr.fit(train_x,train_y)
-  result = clf.predict(test_x)
-  pdb.set_trace()
-  return result
+  # y_predict = clf.predict(test_x)
+  y_score = clf.decision_function(test_x)
+  fpr, tpr, _ = roc_curve(test_y,y_score) #http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html
+  roc_auc1 = auc(fpr, tpr)
+  # roc_auc = roc_auc_score(test_y, y_score) #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html#sklearn.metrics.average_precision_score
+  return roc_auc1
 
 def wpdp(data = read()):
+  roc_results = {}
   for key, val in data.iteritems():
     for one in val:
+      re_temp = []
       for _ in xrange(500):
         instances = one["data"]
         random.shuffle(instances)
         cut = int(len(instances)*0.5)
         A = instances[:cut]
         B = instances[cut:]
-        re = learner(prepareData(A,B))
-        pdb.set_trace()
-        print(re)
+        re_temp += [learner(prepareData(A,B))]
+        re_temp += [learner(prepareData(B,A))]
+      re_sort = sorted(re_temp)
+      roc_results[one["name"]] = o(rawresult = re_sort,median = re_sort[int(len(re_sort)*0.5)] )
+      pdb.set_trace()
 
-
-
-  pass
 
 
 if __name__ == "__main__":
