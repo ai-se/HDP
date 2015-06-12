@@ -133,7 +133,10 @@ def learner(d):
   train_y = [1  if i == "buggy"  else 0 for i in d[1]]
   test_y = [1  if i == "buggy"  else 0 for i in d[3]]
   lr = LogisticRegression()
-  clf = lr.fit(train_x,train_y)
+  try:
+    clf = lr.fit(train_x,train_y)
+  except ValueError:
+    return 0
   # y_predict = clf.predict(test_x)
   y_score = clf.decision_function(test_x)
   fpr, tpr, _ = roc_curve(test_y,y_score) #http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html
@@ -156,7 +159,8 @@ def wpdp(data = read()):
         re_temp += [learner(prepareData(B,A))]
       re_sort = sorted(re_temp)
       roc_results[one["name"]] = o(rawresult = re_sort,median = re_sort[int(len(re_sort)*0.5)] )
-      pdb.set_trace()
+      print(one["name"],"--->" ,roc_results[one["name"]].median)
+      # pdb.set_trace()
 
 
 
