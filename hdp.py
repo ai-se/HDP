@@ -10,7 +10,11 @@ from sklearn.metrics import auc
 from sklearn.metrics import roc_curve, roc_auc_score
 from scipy import stats
 import numpy as np
-
+import weka.core.jvm as jvm
+import weka.core.converters
+from weka.core.converters import Loader
+from weka.classifiers import Classifier
+from weka.experiments import SimpleCrossValidationExperiment
 
 class o:
   ID = 0
@@ -162,13 +166,45 @@ def wpdp(data = read()):
       print(one["name"],"--->" ,roc_results[one["name"]].median)
       # pdb.set_trace()
 
+def wekaCALL():
+  if not jvm.started: jvm.start()
+  datasets = ["./dataset/AEEEM/EQ.arff","./dataset/AEEEM/JDT.arff"]
+  classifiers = [Classifier(classname="weka.classifiers.functions.Logistic")]
+  result = "exp.arff"
+  exp = SimpleCrossValidationExperiment(
+        classification=True,
+        runs = 500,
+        folds = 2,
+        datasets = datasets,
+        classifiers = classifiers,
+        result= result
+  )
+  exp.setup()
+  exp.run()
+  loader = weka.core.converters.loader_for_file(result)
+  data = loader.load_file(result)
+  from weka.experiments import Tester, ResultMatrix
+  matrix = ResultMatrix(classname="weka.experiment.ResultMatrixPlainText")
+  tester = Tester(classname="weka.experiment.PairedCorrectedTTester")
+  tester.resultmatrix = matrix
+
+  # comparison_col = data.attribute_by_name("Percent_correct").index
+  comparison_col = data.attribute_by_name("Area_under_ROC").index
+  tester.instances = data
+  pdb.set_trace()
+
+  print(tester.header(comparison_col))
+  print(tester.multi_resultset_full(0, comparison_col))
+
+
 
 
 if __name__ == "__main__":
   random.seed(1)
   np.random.seed(1)
-  wpdp()
+  # wpdp()
   # KSanalyzer()
+  wekaCALL()
 
 
 
