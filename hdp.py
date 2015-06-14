@@ -2,72 +2,13 @@
 from __future__ import print_function, division
 import pdb
 import random
-from os import listdir
-from os.path import isfile, join
+from utility import *
 import operator
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import auc
 from sklearn.metrics import roc_curve, roc_auc_score
 from scipy import stats
 import numpy as np
-import weka.core.jvm as jvm
-import weka.core.converters
-from weka.core.converters import Loader
-from weka.classifiers import Classifier
-from weka.experiments import SimpleCrossValidationExperiment
-
-class o:
-  ID = 0
-  def __init__(i, **d):
-    o.ID = i.id = o.ID+1
-    i.update(**d)
-
-  def update(i, **d): i.__dict__.update(d); return i
-
-  def __getitem__(i, k): return i.__dict__[k]
-
-  def __hash__(i): return i.id
-
-  def __repr__(i):
-    keys = [k for k in sorted(i.__dict__.keys()) if k[0] is not "_"]
-    show = [":%s %s" % (k, i.__dict__[k]) for k in keys]
-    return '{' + ' '.join(show) + '}'
-
-
-def read(src="./datasetcsv"):
-  """
-  read data from csv files, return all data in a dictionary
-
-  {'AEEEM':[{name ='./datasetcsv/SOFTLAB/ar6.csv'
-             attributes=['ck_oo_numberOfPrivateMethods', 'LDHH_lcom', 'LDHH_fanIn'...]
-             instances=[[.....],[.....]]},]
-   'MORPH':....
-   'NASA':....
-   'Relink':....
-   'SOFTLAB':....]
-  }
-
-  """
-
-  def tofloat(lst):
-    for x in lst:
-      try:
-        yield float(x)
-      except ValueError:
-        yield x[:-1]
-
-  data = {}
-  folders = [i for i in listdir(src) if not isfile(i) and i != ".DS_Store"]
-  for f in folders:
-    path = join(src, f)
-    for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
-      d = open(val, "r")
-      content = d.readlines()
-      attr = content[0].split(",")
-      inst = [list(tofloat(row.split(","))) for row in content[1:]]
-      data[f] = data.get(f, []) + [o(name=val, attr=attr, data=inst)]
-  return data
-
 
 def transform(d):
   col = {}
@@ -148,53 +89,7 @@ def learner(d):
   # roc_auc = roc_auc_score(test_y, y_score) #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html#sklearn.metrics.average_precision_score
   return roc_auc1
 
-def wpdp(data = read()):
-  roc_results = {}
-  for key, val in data.iteritems():
-    for one in val:
-      re_temp = []
-      for _ in xrange(500):
-        instances = one["data"]
-        random.shuffle(instances)
-        cut = int(len(instances)*0.5)
-        A = instances[:cut]
-        B = instances[cut:]
-        re_temp += [learner(prepareData(A,B))]
-        re_temp += [learner(prepareData(B,A))]
-      re_sort = sorted(re_temp)
-      roc_results[one["name"]] = o(rawresult = re_sort,median = re_sort[int(len(re_sort)*0.5)] )
-      print(one["name"],"--->" ,roc_results[one["name"]].median)
-      # pdb.set_trace()
 
-def wekaCALL():
-  if not jvm.started: jvm.start()
-  datasets = ["./dataset/AEEEM/EQ.arff","./dataset/AEEEM/JDT.arff"]
-  classifiers = [Classifier(classname="weka.classifiers.functions.Logistic")]
-  result = "exp.arff"
-  exp = SimpleCrossValidationExperiment(
-        classification=True,
-        runs = 500,
-        folds = 2,
-        datasets = datasets,
-        classifiers = classifiers,
-        result= result
-  )
-  exp.setup()
-  exp.run()
-  loader = weka.core.converters.loader_for_file(result)
-  data = loader.load_file(result)
-  from weka.experiments import Tester, ResultMatrix
-  matrix = ResultMatrix(classname="weka.experiment.ResultMatrixPlainText")
-  tester = Tester(classname="weka.experiment.PairedCorrectedTTester")
-  tester.resultmatrix = matrix
-
-  # comparison_col = data.attribute_by_name("Percent_correct").index
-  comparison_col = data.attribute_by_name("Area_under_ROC").index
-  tester.instances = data
-  pdb.set_trace()
-
-  print(tester.header(comparison_col))
-  print(tester.multi_resultset_full(0, comparison_col))
 
 
 
@@ -204,7 +99,10 @@ if __name__ == "__main__":
   np.random.seed(1)
   # wpdp()
   # KSanalyzer()
-  wekaCALL()
+  #wekaCALL()
+  # filter()
+  # cpdp()
+  readarff()
 
 
 
