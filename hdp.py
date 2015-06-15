@@ -1,7 +1,7 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import pdb
-import random
+import random,math
 from utility import *
 import operator
 from sklearn.linear_model import LogisticRegression
@@ -58,12 +58,46 @@ def KSanalyzer(data = read()):
       for key1, val1 in data.iteritems():
         if key != key1:
           for source in val1:
-            X = KStest(source, target).update(name_source=source["name"], name_target=target["name"])
+            source_name =  "./dataset/"+key1+"/"+source["name"][source["name"].rfind("/")+1:source["name"].rfind(".")]+".arff"
+            target_name =  target["name"][target["name"].rfind("/")+1:target["name"].rfind(".")]
+            X = KStest(source, target).update(train_src=source_name, test_src=target_name)
             if X["score"] > temp_score:
               temp_score = X["score"]
               temp_best = X
       best_pairs.append(temp_best)
+  print(best_pairs)
+  # pdb.set_trace()
   return best_pairs
+
+def call(train,test,train_attr,test_attr):
+  r = round(wekaCALL(train,test,train_attr,test_attr,True),3)
+  if not math.isnan(r):
+    return r
+  else:
+    return 0
+
+def hdp(test_src, source_target_match):
+  # source_target_match = KSanalyzer()
+  result = []
+  train_src = ""
+  test_name = test_src[test_src.rfind("/")+1:test_src.rfind(".")]
+  train_attr,test_attr = [],[]
+  for i in source_target_match:
+    if i.test_src == test_name:
+      train_src = i.train_src
+      train_attr = i.attr_source
+      test_attr = i.attr_target
+  # pdb.set_trace()
+  # train_src ='./dataset/AEEEM/EQ.arff'
+  # train_attr =['ck_oo_noc', 'WCHU_noc', 'numberOfMajorBugsFoundUntil:', 'ck_oo_numberOfAttributes', 'ck_oo_numberOfPrivateAttributes', 'WCHU_rfc', 'ck_oo_numberOfPublicMethods', 'ck_oo_numberOfPrivateMethods', 'ck_oo_fanOut']
+  # test_attr = ['blank_loc', 'code_and_comment_loc', 'formal_parameters', 'decision_count', 'design_complexity', 'call_pairs', 'cyclomatic_complexity', 'multiple_condition_count', 'branch_count']
+  result +=[call(train_src,"./exp/test.arff", train_attr, test_attr)] # hdp should use the same test data splits as wpdp
+  result +=[call(train_src,"./exp/train.arff",train_attr,test_attr)] # test.arff and train.arff are both test case for hdp
+  return result
+
+
+
+
 
 def prepareData(train,test):
   train_x = [t[:-1] for t in train]

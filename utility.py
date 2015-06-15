@@ -76,7 +76,7 @@ def readsrc(src="./dataset"):
   subfolder = [ join(src,i) for i in listdir(src) if not isfile(join(src,i))]
   for one in subfolder:
     data[one]= [ join(one,i)for i in listdir(one) if isfile(join(one,i)) and i != ".DS_Store"]
-  print(data)
+  # print(data)
   return data
 
 def readarff(src = "./dataset/AEEEM/EQ.arff"):
@@ -138,7 +138,7 @@ def wekaExp( datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   print(tester.header(comparison_col))
   print(tester.multi_resultset_full(0, comparison_col))
 
-def wekaCALL(train, test):
+def wekaCALL(train, test, train_attr = [], test_attr = [], isHDP = False):
   """
   weka wrapper to train and test based on the datasets
   :param train: traininng data
@@ -146,6 +146,20 @@ def wekaCALL(train, test):
   :param test: testing data
   :type test: str(src)
   """
+  def getIndex(data,used_attr):
+    del_attr = []
+    for k,attr in enumerate(data.attributes()):
+      temp = str(attr).split(" ")
+      if temp[1] not in used_attr:
+        del_attr +=[k]
+    return del_attr
+
+  def delAttr(data,index):
+    order = sorted(index, reverse=True)
+    for i in order[1:]: # delete from big index, except for the class attribute
+      data.delete_attribute(i)
+    return data
+
   if not jvm.started: jvm.start()
   loader = Loader(classname="weka.core.converters.ArffLoader")
   train_data = loader.load_file(train)
@@ -153,23 +167,21 @@ def wekaCALL(train, test):
   train_data.class_is_last()
   test_data.class_is_last()
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
+  if isHDP:
+    train_del_attr = getIndex(train_data, train_attr)
+    test_del_attr = getIndex(test_data,test_attr)
+    train_data = delAttr(train_data,train_del_attr)
+    test_data = delAttr(test_data,test_del_attr)
   cls.build_classifier(train_data)
   eval = Evaluation(train_data)
   eval.test_model(cls,test_data)
+  test_data.num_attributes
   # print(eval.percent_correct)
   # print(eval.summary())
   # print(eval.class_details())
-  print(eval.area_under_roc(1))
+  # print(eval.area_under_roc(1))
   return eval.area_under_roc(1)
-  # return eval.weighted_area_under_roc
-  # pdb.set_trace()
-  predicted, name = [], []
-  has_defects = False
-  # for index, inst in enumerate(test_data):
-  #   pred = cls.classify_instance(inst)
-  #   print(str(pred),"===>",str(inst.values[-1]))
-  # pdb.set_trace()
-  # print("DONE")
+
 
 
 def filter(data_src = "./dataset/AEEEM/EQ.arff", option = ["-R", "first-3,last"]):
