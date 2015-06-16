@@ -25,10 +25,10 @@ def maximumWeighted(match, top):
   attr_source, attr_target = [], []
   for a in metrics:
     if count < top:  # select top 15% features
-      if a[0][0] not in attr_source and a[0][1] not in attr_target:
+      if a[0][1] not in attr_source and a[0][0] not in attr_target:
         value += a[-1]
-        attr_source.append(a[0][0])
-        attr_target.append(a[0][1])
+        attr_source.append(a[0][1])
+        attr_target.append(a[0][0])
         count += 1
   return o(score=value, attr_source=attr_source, attr_target=attr_target)
 
@@ -37,11 +37,11 @@ def KStest(d1, d2, cutoff=0.05):
   match = {}
   source = transform(d1)
   target = transform(d2)
-  for key1, val1 in source.iteritems():
-    for key2, val2 in target.iteritems():
+  for tar, val1 in target.iteritems():
+    for sou, val2 in source.iteritems():
       result = stats.ks_2samp(np.array(val1), np.array(val2))  # (a,b): b is p-value, zero means significantly different
       if result[1] >= cutoff:
-        match[(key1, key2)] = result[1]
+        match[(tar, sou)] = result[1]
   return maximumWeighted(match, int(len(source) * 0.15))
 
 
