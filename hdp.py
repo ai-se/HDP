@@ -9,6 +9,9 @@ from sklearn.metrics import auc
 from sklearn.metrics import roc_curve, roc_auc_score
 from scipy import stats
 import numpy as np
+import hungarian
+import networkx as nx
+import matplotlib.pyplot as plt
 
 def transform(d):
   col = {}
@@ -19,30 +22,69 @@ def transform(d):
   return col
 
 
-def maximumWeighted(match, top):
-  metrics = sorted(match.items(), key=operator.itemgetter(1), reverse=True)
-  value, count = 0, 0
-  attr_source, attr_target = [], []
-  for a in metrics:
-    if count < top:  # select top 15% features
-      if a[0][1] not in attr_source and a[0][0] not in attr_target:
-        value += a[-1]
-        attr_source.append(a[0][1])
-        attr_target.append(a[0][0])
-        count += 1
-  return o(score=value, attr_source=attr_source, attr_target=attr_target)
+def maximumWeighted(match, target_lst, source_lst):
+  value = 0
+  attr_source, attr_target = [],[]
+  G = nx.Graph()
+  for key, val in match.iteritems():
+    G.add_edge(key[0],key[1], weight= val)
+  Result = nx.max_weight_matching(G)
+  for key,val in Result.iteritems(): # in Results, (A:B) and (B:A) both exist
+    if val in target_lst:
+      attr_target.append(val)
+      attr_source.append(key)
+      value += match[(key,val)]
+  # pdb.set_trace()
+  return  o(score=value, attr_source=attr_source, attr_target=attr_target)
+# def maximumWeighted(match, target_lst, source_lst):
+#   value, count = 0, 0
+#   attr_source, attr_target,grid = [],[],[]
+#   for key in source_lst:
+#     row = []
+#     for tar in target_lst:
+#       found = False
+#       for one in match[key]:
+#         if tar in one:
+#           row +=[one[1]]
+#           found = True
+#       if not found:
+#         row += [-100]
+#     grid.append(row)
+#   print(grid)
+#   total, coordinates = hungarian.maximize(grid)
+#   for (row, col) in coordinates:
+#     attr_source.append(source_lst[row])
+#     attr_target.append(target_lst[col])
+#     print(source_lst[row],"==>",target_lst[col])
+#
+#   pdb.set_trace()
+#
+#   # for a in metrics:
+#   #   if count < top:  # select top 15% features
+#   #     if a[0][1] not in attr_source and a[0][0] not in attr_target:
+#   #       value += a[-1]
+#   #       attr_source.append(a[0][1])
+#   #       attr_target.append(a[0][0])
+#   #       count += 1
+#   return o(score=value, attr_source=attr_source, attr_target=attr_target)
 
 
 def KStest(d1, d2, cutoff=0.05):
   match = {}
   source = transform(d1)
   target = transform(d2)
+  target_lst, source_lst = [], []
   for tar, val1 in target.iteritems():
     for sou, val2 in source.iteritems():
       result = stats.ks_2samp(np.array(val1), np.array(val2))  # (a,b): b is p-value, zero means significantly different
       if result[1] >= cutoff:
-        match[(tar, sou)] = result[1]
-  return maximumWeighted(match, int(len(source) * 0.15))
+        # match[sou] = match.get(sou,[])+[(tar,result[1])]
+        match[(sou,tar)] = result[1]
+        if tar not in target_lst:
+          target_lst.append(tar)
+        if sou not in source_lst:
+          source_lst.append(sou)
+  return maximumWeighted(match, target_lst, source_lst)
 
 
 def KSanalyzer(data = read()):

@@ -29,7 +29,7 @@ def run():
         #cpdp(group,one)
         # pdb.set_trace()
         out_hdp +=hdp(one,source_target_match)
-      pdb.set_trace()
+      # pdb.set_trace()
       re_sorted = sorted(out_hdp)
       print(one, "===>", re_sorted[int(len(re_sorted) * 0.5)])
 if __name__ == "__main__":
