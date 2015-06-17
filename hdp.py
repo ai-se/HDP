@@ -101,7 +101,7 @@ def KSanalyzer(data=read()):
         if key != key1:
           for source in val1:
             source_name = "./dataset/" + key1 + "/" + source["name"][
-                                                      source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
+                          source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
             X = KStest(source, target).update(train_src=source_name, test_src=target_name)
             if X["score"] > temp_score:
@@ -156,33 +156,6 @@ def hdp(test_src, source_target_match):
   result += [
     call(train_src, "./exp/train.arff", train_attr, test_attr)]  # test.arff and train.arff are both test case for hdp
   return result
-#
-#
-# def prepareData(train, test):
-#   train_x = [t[:-1] for t in train]
-#   train_y = [(t[-1]) for t in train]
-#   test_x = [t[:-1] for t in test]
-#   test_y = [(t[-1]) for t in test]
-#   return [train_x, train_y, test_x, test_y]
-#
-#
-# def learner(d):
-#   train_x, train_y, test_x, test_y = d[0], d[1], d[2], d[3]
-#   train_y = [1 if i == "buggy"  else 0 for i in d[1]]
-#   test_y = [1 if i == "buggy"  else 0 for i in d[3]]
-#   lr = LogisticRegression()
-#   try:
-#     clf = lr.fit(train_x, train_y)
-#   except ValueError:
-#     return 0
-#   # y_predict = clf.predict(test_x)
-#   y_score = clf.decision_function(test_x)
-#   fpr, tpr, _ = roc_curve(test_y, y_score)  # http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html
-#   roc_auc1 = auc(fpr, tpr)
-#   # roc_auc = roc_auc_score(test_y, y_score)
-#   # #http://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html#sklearn.metrics
-#   # .average_precision_score
-#   return roc_auc1
 
 
 if __name__ == "__main__":
