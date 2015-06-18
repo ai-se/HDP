@@ -24,7 +24,7 @@ def run():
                        ["-N", "2", "-F", "1", "-S", "1"])
         test = filter(randomized, "weka.filters.supervised.instance.StratifiedRemoveFolds",
                       ["-N", "2", "-F", "2", "-S", "1"])
-        # out_wpdp += wpdp()
+        # out_wpdp += wpdp(tarin, test)
         #cpdp(group,one)
         temp = hdp(one, source_target_match, train, test)
         if len(temp) == 0:

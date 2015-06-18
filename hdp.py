@@ -101,11 +101,11 @@ def KSanalyzer(data=read()):
         if key != key1:
           for source in val1:
             source_name = "./dataset/" + key1 + "/" + source["name"][
-                          source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
+                                                      source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
             X = KStest(source, target).update(train_src=source_name, test_src=target_name)
             # if X["score"] > temp_score:
-            #   temp_score = X["score"]
+            # temp_score = X["score"]
             #   temp_best = X # it seems they use all feasible pairs, not the best one as I thought
             best_pairs.append(X)
   return best_pairs
@@ -132,7 +132,7 @@ def call(train, test, train_attr, test_attr):
     return []
 
 
-def hdp(test_src, source_target_match,test_A, test_B):
+def hdp(test_src, source_target_match, test_A, test_B):
   """
    source_target_match = KSanalyzer()
   :param test_src : src of test(target) data set
@@ -149,7 +149,7 @@ def hdp(test_src, source_target_match,test_A, test_B):
   result = []
   test_name = test_src[test_src.rfind("/") + 1:test_src.rfind(".")]
   for i in source_target_match:
-    if i.test_src == test_name: # for all
+    if i.test_src == test_name:  # for all
       train_attr = i.attr_source
       test_attr = i.attr_target
       train_data = loadWekaData(i.train_src)
