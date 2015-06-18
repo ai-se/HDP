@@ -195,3 +195,25 @@ def filter(data_src = "./dataset/AEEEM/EQ.arff", option = ["-R", "first-3,last"]
   saver.save_file(filtered,"./dataset/AEEEM/EQ_FFF.arff")
   print(filtered)
   return filtered
+
+def attributeSelection():
+  if not jvm.started: jvm.start()
+  loader = Loader(classname="weka.core.converters.ArffLoader")
+  data = loader.load_file("./dataset/AEEEM/EQ.arff")
+  data.class_is_last()
+
+  from weka.attribute_selection import ASSearch, ASEvaluation, AttributeSelection
+  search = ASSearch(classname="weka.attributeSelection.Ranker", options=["-D", "1", "-N", "9"])
+  evaluator = ASEvaluation(classname="weka.attributeSelection.ChiSquaredAttributeEval")
+  attsel = AttributeSelection()
+  attsel.search(search)
+  attsel.evaluator(evaluator)
+  attsel.select_attributes(data)
+
+  print("# attributes: " + str(attsel.number_attributes_selected))
+  print("attributes: " + str(attsel.selected_attributes))
+  pdb.set_trace()
+  print("result string:\n" + attsel.results_string)
+
+if __name__ == "__main__":
+  attributeSelection()
