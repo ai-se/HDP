@@ -1,4 +1,4 @@
-#__author__ = 'WeiFu'
+# __author__ = 'WeiFu'
 from __future__ import print_function, division
 import pdb
 import random
@@ -12,10 +12,12 @@ from weka.experiments import SimpleCrossValidationExperiment
 from weka.filters import Filter
 from weka.attribute_selection import ASSearch, ASEvaluation, AttributeSelection
 
+
 class o:
   ID = 0
+
   def __init__(i, **d):
-    o.ID = i.id = o.ID+1
+    o.ID = i.id = o.ID + 1
     i.update(**d)
 
   def update(i, **d): i.__dict__.update(d); return i
@@ -64,6 +66,7 @@ def read(src="./datasetcsv"):
       data[f] = data.get(f, []) + [o(name=val, attr=attr, data=inst)]
   return data
 
+
 def readsrc(src="./dataset"):
   """
   read all data files in src folder into dictionary,
@@ -74,13 +77,14 @@ def readsrc(src="./dataset"):
   :rtype: dictionary
   """
   data = {}
-  subfolder = [ join(src,i) for i in listdir(src) if not isfile(join(src,i))]
+  subfolder = [join(src, i) for i in listdir(src) if not isfile(join(src, i))]
   for one in subfolder:
-    data[one]= [ join(one,i)for i in listdir(one) if isfile(join(one,i)) and i != ".DS_Store"]
+    data[one] = [join(one, i) for i in listdir(one) if isfile(join(one, i)) and i != ".DS_Store"]
   # print(data)
   return data
 
-def readarff(src = "./dataset/AEEEM/EQ.arff"):
+
+def readarff(src="./dataset/AEEEM/EQ.arff"):
   """
   read each arff and return header and content
   :param src: src of arff file
@@ -89,7 +93,7 @@ def readarff(src = "./dataset/AEEEM/EQ.arff"):
   :rtype:tuple (str, list)
   """
   f = open(src, "r")
-  content,arffheader  = [],[]
+  content, arffheader = [], []
   while True:
     line = f.readline()
     if not line:
@@ -99,18 +103,20 @@ def readarff(src = "./dataset/AEEEM/EQ.arff"):
       if "data" in line:
         continue
     else:
-      if len(line) <10:
+      if len(line) < 10:
         continue
-      if line[-1] !="\n":
-        line+="\n"
-      content +=[line]
+      if line[-1] != "\n":
+        line += "\n"
+      content += [line]
   return "".join(arffheader), content
 
-def writearff(data,name,src = "./exp"):
+
+def writearff(data, name, src="./exp"):
   """
   """
-  wf = open(src+"/"+name+".arff","w")
+  wf = open(src + "/" + name + ".arff", "w")
   wf.write(data)
+
 
 def loadWekaData(src):
   if not jvm.started: jvm.start()
@@ -119,23 +125,19 @@ def loadWekaData(src):
   data.class_is_last()
   return data
 
-def wekaExp( datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
+
+def wekaExp(datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   if not jvm.started: jvm.start()
   classifiers = [Classifier(classname="weka.classifiers.functions.Logistic")]
   result = "exp.arff"
-  exp = SimpleCrossValidationExperiment(
-        classification=True,
-        runs = run,
-        folds = fold,
-        datasets = datasets,
-        classifiers = classifiers,
-        result= result
-  )
+  exp = SimpleCrossValidationExperiment(classification=True, runs=run, folds=fold, datasets=datasets,
+    classifiers=classifiers, result=result)
   exp.setup()
   exp.run()
   loader = weka.core.converters.loader_for_file(result)
   data = loader.load_file(result)
   from weka.experiments import Tester, ResultMatrix
+
   matrix = ResultMatrix(classname="weka.experiment.ResultMatrixPlainText")
   tester = Tester(classname="weka.experiment.PairedCorrectedTTester")
   tester.resultmatrix = matrix
@@ -146,7 +148,8 @@ def wekaExp( datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   print(tester.header(comparison_col))
   print(tester.multi_resultset_full(0, comparison_col))
 
-def wekaCALL(train_data, test_data, train_attr = [], test_attr = [], isHDP = False):
+
+def wekaCALL(train_data, test_data, train_attr=[], test_attr=[], isHDP=False):
   """
   weka wrapper to train and test based on the datasets
   :param train: traininng data
@@ -154,17 +157,18 @@ def wekaCALL(train_data, test_data, train_attr = [], test_attr = [], isHDP = Fal
   :param test: testing data
   :type test: str(src)
   """
-  def getIndex(data,used_attr):
+
+  def getIndex(data, used_attr):
     del_attr = []
-    for k,attr in enumerate(data.attributes()):
+    for k, attr in enumerate(data.attributes()):
       temp = str(attr).split(" ")
       if temp[1] not in used_attr:
-        del_attr +=[k]
+        del_attr += [k]
     return del_attr
 
-  def delAttr(data,index):
+  def delAttr(data, index):
     order = sorted(index, reverse=True)
-    for i in order[1:]: # delete from big index, except for the class attribute
+    for i in order[1:]:  # delete from big index, except for the class attribute
       data.delete_attribute(i)
     return data
 
@@ -173,12 +177,12 @@ def wekaCALL(train_data, test_data, train_attr = [], test_attr = [], isHDP = Fal
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
   if isHDP:
     train_del_attr = getIndex(train_data, train_attr)
-    test_del_attr = getIndex(test_data,test_attr)
-    train_data = delAttr(train_data,train_del_attr)
-    test_data = delAttr(test_data,test_del_attr)
+    test_del_attr = getIndex(test_data, test_attr)
+    train_data = delAttr(train_data, train_del_attr)
+    test_data = delAttr(test_data, test_del_attr)
   cls.build_classifier(train_data)
   eval = Evaluation(train_data)
-  eval.test_model(cls,test_data)
+  eval.test_model(cls, test_data)
   # test_data.num_attributes
   # print(eval.percent_correct)
   # print(eval.summary())
@@ -187,17 +191,17 @@ def wekaCALL(train_data, test_data, train_attr = [], test_attr = [], isHDP = Fal
   return eval.area_under_roc(1)
 
 
-
-def filter(data,filter_name ="weka.filters.unsupervised.attribute.Remove", option = ["-R", "first-3,last"]):
+def filter(data, filter_name="weka.filters.unsupervised.attribute.Remove", option=["-R", "first-3,last"]):
   # remove = Filter(classname="weka.filters.unsupervised.attribute.Remove", options = option)
   # option = ["-N","2","-F","2","-S","1"]
-  remove = Filter(classname=filter_name, options = option)
+  remove = Filter(classname=filter_name, options=option)
   remove.inputformat(data)
   filtered = remove.filter(data)
   # print(filtered)
   return filtered
 
-def featureSelection(data,num_of_attributes):
+
+def featureSelection(data, num_of_attributes):
   """
   feature selection
   :param data: data to do feature selection
@@ -216,16 +220,17 @@ def featureSelection(data,num_of_attributes):
   # print("# attributes: " + str(attsel.number_attributes_selected))
   # print("attributes: " + str(attsel.selected_attributes))
   # print("result string:\n" + attsel.results_string)
-  for i in reversed(range(data.class_index)): # delete feature
+  for i in reversed(range(data.class_index)):  # delete feature
     if i not in attsel.selected_attributes:
       data.delete_attribute(i)
   return data
+
 
 if __name__ == "__main__":
   if not jvm.started: jvm.start()
   loader = Loader(classname="weka.core.converters.ArffLoader")
   data = loader.load_file("./dataset/AEEEM/EQ.arff")
   data.class_is_last()
-  featureSelection(data,9)
+  featureSelection(data, 9)
   # filter()
   # filter()
