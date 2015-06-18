@@ -12,10 +12,10 @@ def call(train,test):
   else:
     return 0
 
-def wpdp():
+def wpdp(train,test):
   result_once = []
-  result_once+=[call("./exp/train.arff","./exp/test.arff")]
-  result_once+=[call("./exp/test.arff","./exp/train.arff")]
+  result_once+=[call(train,test)]
+  result_once+=[call(test,train)]
   return result_once
 
 

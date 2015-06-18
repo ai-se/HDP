@@ -10,6 +10,7 @@ from weka.core.converters import Loader, Saver
 from weka.classifiers import Classifier, Evaluation
 from weka.experiments import SimpleCrossValidationExperiment
 from weka.filters import Filter
+from weka.attribute_selection import ASSearch, ASEvaluation, AttributeSelection
 
 class o:
   ID = 0
@@ -111,6 +112,13 @@ def writearff(data,name,src = "./exp"):
   wf = open(src+"/"+name+".arff","w")
   wf.write(data)
 
+def loadWekaData(src):
+  if not jvm.started: jvm.start()
+  loader = Loader(classname="weka.core.converters.ArffLoader")
+  data = loader.load_file(src)
+  data.class_is_last()
+  return data
+
 def wekaExp( datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   if not jvm.started: jvm.start()
   classifiers = [Classifier(classname="weka.classifiers.functions.Logistic")]
@@ -138,7 +146,7 @@ def wekaExp( datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   print(tester.header(comparison_col))
   print(tester.multi_resultset_full(0, comparison_col))
 
-def wekaCALL(train, test, train_attr = [], test_attr = [], isHDP = False):
+def wekaCALL(train_data, test_data, train_attr = [], test_attr = [], isHDP = False):
   """
   weka wrapper to train and test based on the datasets
   :param train: traininng data
@@ -160,10 +168,6 @@ def wekaCALL(train, test, train_attr = [], test_attr = [], isHDP = False):
       data.delete_attribute(i)
     return data
 
-  if not jvm.started: jvm.start()
-  loader = Loader(classname="weka.core.converters.ArffLoader")
-  train_data = loader.load_file(train)
-  test_data = loader.load_file(test)
   train_data.class_is_last()
   test_data.class_is_last()
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
@@ -175,7 +179,7 @@ def wekaCALL(train, test, train_attr = [], test_attr = [], isHDP = False):
   cls.build_classifier(train_data)
   eval = Evaluation(train_data)
   eval.test_model(cls,test_data)
-  test_data.num_attributes
+  # test_data.num_attributes
   # print(eval.percent_correct)
   # print(eval.summary())
   # print(eval.class_details())
@@ -184,36 +188,44 @@ def wekaCALL(train, test, train_attr = [], test_attr = [], isHDP = False):
 
 
 
-def filter(data_src = "./dataset/AEEEM/EQ.arff", option = ["-R", "first-3,last"]):
-  if not jvm.started: jvm.start()
-  loader = Loader(classname="weka.core.converters.ArffLoader")
-  data = loader.load_file(data_src)
-  remove = Filter(classname="weka.filters.unsupervised.attribute.Remove", options = option)
+def filter(data,filter_name ="weka.filters.unsupervised.attribute.Remove", option = ["-R", "first-3,last"]):
+  # remove = Filter(classname="weka.filters.unsupervised.attribute.Remove", options = option)
+  # option = ["-N","2","-F","2","-S","1"]
+  remove = Filter(classname=filter_name, options = option)
   remove.inputformat(data)
   filtered = remove.filter(data)
-  saver = Saver(classname="weka.core.converters.ArffSaver")
-  saver.save_file(filtered,"./dataset/AEEEM/EQ_FFF.arff")
-  print(filtered)
+  # print(filtered)
   return filtered
 
-def attributeSelection():
-  if not jvm.started: jvm.start()
-  loader = Loader(classname="weka.core.converters.ArffLoader")
-  data = loader.load_file("./dataset/AEEEM/EQ.arff")
-  data.class_is_last()
-
-  from weka.attribute_selection import ASSearch, ASEvaluation, AttributeSelection
-  search = ASSearch(classname="weka.attributeSelection.Ranker", options=["-D", "1", "-N", "9"])
+def featureSelection(data,num_of_attributes):
+  """
+  feature selection
+  :param data: data to do feature selection
+  :type data : Instance
+  :param num_of_attributes : # of attributes to be selected
+  :type num_of_attributes : int
+  :return: data with selected feature
+  :rtype: Instance
+  """
+  search = ASSearch(classname="weka.attributeSelection.Ranker", options=["-D", "2", "-N", str(num_of_attributes)])
   evaluator = ASEvaluation(classname="weka.attributeSelection.ChiSquaredAttributeEval")
   attsel = AttributeSelection()
   attsel.search(search)
   attsel.evaluator(evaluator)
   attsel.select_attributes(data)
-
-  print("# attributes: " + str(attsel.number_attributes_selected))
-  print("attributes: " + str(attsel.selected_attributes))
-  pdb.set_trace()
-  print("result string:\n" + attsel.results_string)
+  # print("# attributes: " + str(attsel.number_attributes_selected))
+  # print("attributes: " + str(attsel.selected_attributes))
+  # print("result string:\n" + attsel.results_string)
+  for i in reversed(range(data.class_index)): # delete feature
+    if i not in attsel.selected_attributes:
+      data.delete_attribute(i)
+  return data
 
 if __name__ == "__main__":
-  attributeSelection()
+  if not jvm.started: jvm.start()
+  loader = Loader(classname="weka.core.converters.ArffLoader")
+  data = loader.load_file("./dataset/AEEEM/EQ.arff")
+  data.class_is_last()
+  featureSelection(data,9)
+  # filter()
+  # filter()

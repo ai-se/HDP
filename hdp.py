@@ -104,10 +104,10 @@ def KSanalyzer(data=read()):
                           source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
             X = KStest(source, target).update(train_src=source_name, test_src=target_name)
-            if X["score"] > temp_score:
-              temp_score = X["score"]
-              temp_best = X
-      best_pairs.append(temp_best)
+            # if X["score"] > temp_score:
+            #   temp_score = X["score"]
+            #   temp_best = X # it seems they use all feasible pairs, not the best one as I thought
+            best_pairs.append(X)
   return best_pairs
 
 
@@ -123,38 +123,39 @@ def call(train, test, train_attr, test_attr):
   :param test_attr: matched feature for testing data set
   :type test_attr: list
   :return ROC area value
-  :rtype: float
+  :rtype: list
   """
   r = round(wekaCALL(train, test, train_attr, test_attr, True), 3)
   if not math.isnan(r):
-    return r
+    return [r]
   else:
-    return 0
+    return []
 
 
-def hdp(test_src, source_target_match):
+def hdp(test_src, source_target_match,test_A, test_B):
   """
    source_target_match = KSanalyzer()
   :param test_src : src of test(target) data set
   :type test_src : str
   :param source_target_match : matched source and target data test
   :type source_target_match: list
+  :param test_A : first half-split test data in wpdp
+  :type test_A : Instance
+  :param test_B : second half-split test data in wpdp
+  :type test_B : Instance
   :return: value of ROC area
   :rtype: list
   """
   result = []
-  train_src = ""
   test_name = test_src[test_src.rfind("/") + 1:test_src.rfind(".")]
-  train_attr, test_attr = [], []
   for i in source_target_match:
-    if i.test_src == test_name:
-      train_src = i.train_src
+    if i.test_src == test_name: # for all
       train_attr = i.attr_source
       test_attr = i.attr_target
-  result += [
-    call(train_src, "./exp/test.arff", train_attr, test_attr)]  # hdp should use the same test data splits as wpdp
-  result += [
-    call(train_src, "./exp/train.arff", train_attr, test_attr)]  # test.arff and train.arff are both test case for hdp
+      train_data = loadWekaData(i.train_src)
+      result += call(train_data, test_A, train_attr, test_attr)  # hdp should use the same test data splits as wpdp
+      result += call(train_data, test_B, train_attr, test_attr)  # test.arff and train.arff are both test case for hdp
+  # if train_src == "": return []
   return result
 
 

@@ -15,20 +15,20 @@ def run():
   for group, srclst in datasrc.iteritems():
     for one in srclst:
       random.seed(1)
-      # one = "./dataset/MORPH/ant-1.3.arff"
-      arffheader, arffcontent = readarff(one)
+      data = loadWekaData(one)
+      data_feature_selected = featureSelection(data,int((data.class_index)*0.15))
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
       for _ in xrange(500):
-        random.shuffle(arffcontent)
-        cut = int(len(arffcontent) * 0.5)
-        A = arffcontent[:cut]
-        B = arffcontent[cut:]
-        writearff(arffheader + "".join(A), "train")
-        writearff(arffheader + "".join(B), "test")
+        randomized = filter(data_feature_selected,"weka.filters.unsupervised.instance.Randomize",["-S",str(_)])
+        train = filter(randomized,"weka.filters.supervised.instance.StratifiedRemoveFolds",["-N","2","-F","1","-S","1"])
+        test = filter(randomized,"weka.filters.supervised.instance.StratifiedRemoveFolds",["-N","2","-F","2","-S","1"])
         # out_wpdp += wpdp()
         #cpdp(group,one)
-        # pdb.set_trace()
-        out_hdp +=hdp(one,source_target_match)
+        temp = hdp(one,source_target_match,train,test)
+        if len(temp) == 0:
+          continue
+        else:
+          out_hdp += temp
       # pdb.set_trace()
       re_sorted = sorted(out_hdp)
       print(one, "===>", re_sorted[int(len(re_sorted) * 0.5)])
