@@ -14,8 +14,8 @@ def call(train,test):
 
 def wpdp(train,test):
   result_once = []
-  result_once+=[call(train,test)]
-  result_once+=[call(test,train)]
+  result_once+=[call(featureSelection(train, int((data.class_index) * 0.15)),test)]
+  result_once+=[call(featureSelection(test, int((data.class_index) * 0.15)),train)]
   return result_once
 
 

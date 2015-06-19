@@ -149,7 +149,7 @@ def wekaExp(datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   print(tester.multi_resultset_full(0, comparison_col))
 
 
-def wekaCALL(train_data, test_data, train_attr=[], test_attr=[], isHDP=False):
+def wekaCALL(train_src, test_src, train_attr=[], test_attr=[], isHDP=False):
   """
   weka wrapper to train and test based on the datasets
   :param train: traininng data
@@ -159,6 +159,7 @@ def wekaCALL(train_data, test_data, train_attr=[], test_attr=[], isHDP=False):
   """
 
   def getIndex(data, used_attr):
+    # pdb.set_trace()
     del_attr = []
     for k, attr in enumerate(data.attributes()):
       temp = str(attr).split(" ")
@@ -172,10 +173,12 @@ def wekaCALL(train_data, test_data, train_attr=[], test_attr=[], isHDP=False):
       data.delete_attribute(i)
     return data
 
-  train_data.class_is_last()
-  test_data.class_is_last()
+  train_data_raw = loadWekaData(train_src)
+  train_data = featureSelection(train_data_raw,int(train_data_raw.class_index*0.15))
+  test_data = loadWekaData(test_src)
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
   if isHDP:
+    pdb.set_trace()
     train_del_attr = getIndex(train_data, train_attr)
     test_del_attr = getIndex(test_data, test_attr)
     train_data = delAttr(train_data, train_del_attr)
@@ -191,12 +194,15 @@ def wekaCALL(train_data, test_data, train_attr=[], test_attr=[], isHDP=False):
   return eval.area_under_roc(1)
 
 
-def filter(data, filter_name="weka.filters.unsupervised.attribute.Remove", option=["-R", "first-3,last"]):
+def filter(data, toSave = False,file_name = "test",filter_name="weka.filters.unsupervised.attribute.Remove", option=["-R", "first-3,last"]):
   # remove = Filter(classname="weka.filters.unsupervised.attribute.Remove", options = option)
   # option = ["-N","2","-F","2","-S","1"]
   remove = Filter(classname=filter_name, options=option)
   remove.inputformat(data)
   filtered = remove.filter(data)
+  if toSave:
+    saver = Saver(classname="weka.core.converters.ArffSaver")
+    saver.save_file(filtered,"./exp/"+file_name+".arff")
   # print(filtered)
   return filtered
 
@@ -223,6 +229,7 @@ def featureSelection(data, num_of_attributes):
   for i in reversed(range(data.class_index)):  # delete feature
     if i not in attsel.selected_attributes:
       data.delete_attribute(i)
+  # pdb.set_trace()
   return data
 
 

@@ -12,7 +12,7 @@ import numpy as np
 import networkx as nx
 
 
-def transform(d):
+def transform(d,selected = []):
   """
   the data will be stored by column, not by instance
   :param d : data
@@ -23,8 +23,9 @@ def transform(d):
   col = {}
   for row in d["data"]:
     for attr, cell in zip(d["attr"][:-1], row[:-1]):  # exclude last columm, $bug
-      if "?" not in attr:  # get rid of name, version columns.
-        col[attr] = col.get(attr, []) + [cell]
+      if len(selected) != 0 and attr not in selected:  # get rid of name, version columns.
+        continue # if this is for feature selected data, just choose those features.
+      col[attr] = col.get(attr, []) + [cell]
   return col
 
 
@@ -56,18 +57,24 @@ def maximumWeighted(match, target_lst, source_lst):
   return o(score=value, attr_source=attr_source, attr_target=attr_target)
 
 
-def KStest(d1, d2, cutoff=0.05):
+def KStest(d1, d2, sourcename, cutoff=0.05):
   """
   Kolmogorov-Smirnov Test
   :param d1 : source data
   :type d1 : o
   :param d2: target data
   :type d2: o
+  :param sourcename: src of source
+  :type sourcename : str
   :return : results of maximumWeighted
   :rtype: o
   """
   match = {}
-  source = transform(d1)
+  # pdb.set_trace()
+  A = loadWekaData(sourcename)
+  A_selected = featureSelection(A, int((A.class_index) * 0.15))
+  features = [str(i).split(" ")[1] for i in A_selected.attributes()][:-1]
+  source = transform(d1,features)
   target = transform(d2)
   target_lst, source_lst = [], []
   for tar, val1 in target.iteritems():
@@ -103,15 +110,17 @@ def KSanalyzer(data=read()):
             source_name = "./dataset/" + key1 + "/" + source["name"][
                                                       source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
-            X = KStest(source, target).update(train_src=source_name, test_src=target_name)
+            X = KStest(source, target,source_name).update(train_src=source_name, test_src=target_name)
             # if X["score"] > temp_score:
             # temp_score = X["score"]
             #   temp_best = X # it seems they use all feasible pairs, not the best one as I thought
-            best_pairs.append(X)
+            if X.score > 0.05:
+              best_pairs.append(X)
+      # pdb.set_trace()
   return best_pairs
 
 
-def call(train, test, train_attr, test_attr):
+def call(train_src, test_src, train_attr, test_attr):
   """
   call weka to perform learning and testing
   :param train: src of training data
@@ -125,14 +134,14 @@ def call(train, test, train_attr, test_attr):
   :return ROC area value
   :rtype: list
   """
-  r = round(wekaCALL(train, test, train_attr, test_attr, True), 3)
+  r = round(wekaCALL(train_src, test_src, train_attr, test_attr, True), 3)
   if not math.isnan(r):
     return [r]
   else:
     return []
 
 
-def hdp(test_src, source_target_match, test_A, test_B):
+def hdp(test_src, source_target_match):
   """
    source_target_match = KSanalyzer()
   :param test_src : src of test(target) data set
@@ -152,9 +161,9 @@ def hdp(test_src, source_target_match, test_A, test_B):
     if i.test_src == test_name:  # for all
       train_attr = i.attr_source
       test_attr = i.attr_target
-      train_data = loadWekaData(i.train_src)
-      result += call(train_data, test_A, train_attr, test_attr)  # hdp should use the same test data splits as wpdp
-      result += call(train_data, test_B, train_attr, test_attr)  # test.arff and train.arff are both test case for hdp
+      train_src = i.train_src
+      result += call(train_src, "./exp/train.arff", train_attr, test_attr)  # hdp should use the same test data splits as wpdp
+      result += call(train_src, "./exp/test.arff", train_attr, test_attr)  # test.arff and train.arff are both test case for hdp
   # if train_src == "": return []
   return result
 
