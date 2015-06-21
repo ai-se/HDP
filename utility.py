@@ -156,6 +156,14 @@ def wekaCALL(train_src, test_src, train_attr=[], test_attr=[], isHDP=False):
   :type train: str(src)
   :param test: testing data
   :type test: str(src)
+  :param train_attr: features selected for building a learner
+  :type train_attr:list
+  :param test_attr: features selected in target data to predict labels
+  :type test_attr: list
+  :param isHDP: flag
+  :type isHDP:bool
+  :return: AUC
+  :rtype: float
   """
 
   def getIndex(data, used_attr):
