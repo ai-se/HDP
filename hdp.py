@@ -148,10 +148,6 @@ def hdp(test_src, source_target_match):
   :type test_src : str
   :param source_target_match : matched source and target data test
   :type source_target_match: list
-  :param test_A : first half-split test data in wpdp
-  :type test_A : Instance
-  :param test_B : second half-split test data in wpdp
-  :type test_B : Instance
   :return: value of ROC area
   :rtype: list
   """
