@@ -178,7 +178,7 @@ def wekaCALL(train_src, test_src, train_attr=[], test_attr=[], isHDP=False):
   test_data = loadWekaData(test_src)
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
   if isHDP:
-    pdb.set_trace()
+    # pdb.set_trace()
     train_del_attr = getIndex(train_data, train_attr)
     test_del_attr = getIndex(test_data, test_attr)
     train_data = delAttr(train_data, train_del_attr)

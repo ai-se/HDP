@@ -76,11 +76,12 @@ def KStest(d1, d2, sourcename, cutoff=0.05):
   features = [str(i).split(" ")[1] for i in A_selected.attributes()][:-1]
   source = transform(d1,features)
   target = transform(d2)
+  # pdb.set_trace()
   target_lst, source_lst = [], []
   for tar, val1 in target.iteritems():
     for sou, val2 in source.iteritems():
       result = stats.ks_2samp(np.array(val1), np.array(val2))  # (a,b): b is p-value, zero means significantly different
-      if result[1] >= cutoff:
+      if result[1] > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou, tar)] = result[1]
         if tar not in target_lst:
@@ -112,10 +113,9 @@ def KSanalyzer(data=read()):
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
             X = KStest(source, target,source_name).update(train_src=source_name, test_src=target_name)
             # if X["score"] > temp_score:
-            # temp_score = X["score"]
+            #   temp_score = X["score"]
             #   temp_best = X # it seems they use all feasible pairs, not the best one as I thought
-            if X.score > 0.05:
-              best_pairs.append(X)
+            best_pairs.append(X)
       # pdb.set_trace()
   return best_pairs
 
@@ -155,17 +155,50 @@ def hdp(test_src, source_target_match):
   :return: value of ROC area
   :rtype: list
   """
-  result = []
+  result1, result2, result = [],[],[]
   test_name = test_src[test_src.rfind("/") + 1:test_src.rfind(".")]
   for i in source_target_match:
     if i.test_src == test_name:  # for all
       train_attr = i.attr_source
       test_attr = i.attr_target
       train_src = i.train_src
-      result += call(train_src, "./exp/train.arff", train_attr, test_attr)  # hdp should use the same test data splits as wpdp
-      result += call(train_src, "./exp/test.arff", train_attr, test_attr)  # test.arff and train.arff are both test case for hdp
+      result1 += call(train_src, "./exp/train.arff", train_attr, test_attr)  # hdp should use the same test data splits as wpdp
+      result2 += call(train_src, "./exp/test.arff", train_attr, test_attr)  # test.arff and train.arff are both test case for hdp
   # if train_src == "": return []
+  A = sorted(result1)
+  B = sorted(result2)
+  result +=[A[-1]]
+  result +=[B[-1]]
+  # print(result)
   return result
+
+
+def testEQ():
+  def tofloat(lst):
+    for x in lst:
+      try:
+        yield float(x)
+      except ValueError:
+        yield x[:-1]
+
+  test_src = "./dataset/Relink/apache.arff"
+  train_src = "./dataset/AEEEM/EQ.arff"
+
+  d = open("./datasetcsv/AEEEM/EQ.csv", "r")
+  content = d.readlines()
+  attr = content[0].split(",")
+  inst = [list(tofloat(row.split(","))) for row in content[1:]]
+  d1 = o(name="./datasetcsv/AEEEM/EQ.csv", attr=attr, data=inst)
+
+  d = open("./datasetcsv/Relink/apache.csv", "r")
+  content = d.readlines()
+  attr = content[0].split(",")
+  inst = [list(tofloat(row.split(","))) for row in content[1:]]
+  d2 = o(name="./datasetcsv/Relink/apache.csv", attr=attr, data=inst)
+  Result = KStest(d1,d2,train_src)
+  print(Result)
+  pdb.set_trace()
+  print("DONE")
 
 
 if __name__ == "__main__":
@@ -176,7 +209,8 @@ if __name__ == "__main__":
   # wekaCALL()
   # filter()
   # cpdp()
-  readarff()
+  # readarff()
+  testEQ()
 
 
 
