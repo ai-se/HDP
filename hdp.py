@@ -12,7 +12,7 @@ import numpy as np
 import networkx as nx
 
 
-def transform(d,selected = []):
+def transform(d, selected=[]):
   """
   the data will be stored by column, not by instance
   :param d : data
@@ -24,7 +24,7 @@ def transform(d,selected = []):
   for row in d["data"]:
     for attr, cell in zip(d["attr"][:-1], row[:-1]):  # exclude last columm, $bug
       if len(selected) != 0 and attr not in selected:  # get rid of name, version columns.
-        continue # if this is for feature selected data, just choose those features.
+        continue  # if this is for feature selected data, just choose those features.
       col[attr] = col.get(attr, []) + [cell]
   return col
 
@@ -70,9 +70,8 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   :rtype: o
   """
   match = {}
-  source = transform(d_source,features)
+  source = transform(d_source, features)
   target = transform(d_target)
-  pdb.set_trace()
   target_lst, source_lst = [], []
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
@@ -84,20 +83,22 @@ def KStest(d_source, d_target, features, cutoff=0.05):
           target_lst.append(tar_feature)
         if sou_feature not in source_lst:
           source_lst.append(sou_feature)
+  if len(match) < 1:
+    return o(score = 0)
   return maximumWeighted(match, target_lst, source_lst)
+
 
 def attributeSelection(data):
   feature_dict = {}
   for key, lst in data.iteritems():
     for source in lst:
       source_name = "./dataset/" + key + "/" + source["name"][
-                                                      source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
+                                               source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
       A = loadWekaData(source_name)
-      A_selected = featureSelection(A, int(A.class_index* 0.15))
+      A_selected = featureSelection(A, int(A.class_index * 0.15))
       features_list = [str(i).split(" ")[1] for i in A_selected.attributes()][:-1]
       feature_dict[source_name] = features_list
   return feature_dict
-
 
 
 def KSanalyzer(data=read()):
@@ -121,10 +122,11 @@ def KSanalyzer(data=read()):
             source_name = "./dataset/" + key1 + "/" + source["name"][
                                                       source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
-            X = KStest(source, target,selected_features[source_name]).update(train_src=source_name, test_src=target_name)
+            X = KStest(source, target, selected_features[source_name]).update(train_src=source_name,
+                                                                              test_src=target_name)
             if X["score"] > temp_score:
               temp_score = X["score"]
-              temp_best = X # it seems they use all feasible pairs, not the best one as I thought
+              temp_best = X  # it seems they use all feasible pairs, not the best one as I thought
       best_pairs.append(temp_best)
       # pdb.set_trace()
   return best_pairs
@@ -161,20 +163,22 @@ def hdp(test_src, source_target_match):
   :return: value of ROC area
   :rtype: list
   """
-  result1, result2, result = [],[],[]
+  result1, result2, result = [], [], []
   test_name = test_src[test_src.rfind("/") + 1:test_src.rfind(".")]
   for i in source_target_match:
     if i.test_src == test_name:  # for all
       train_attr = i.attr_source
       test_attr = i.attr_target
       train_src = i.train_src
-      result1 += call(train_src, "./exp/train.arff", train_attr, test_attr)  # hdp should use the same test data splits as wpdp
-      result2 += call(train_src, "./exp/test.arff", train_attr, test_attr)  # test.arff and train.arff are both test case for hdp
+      result1 += call(train_src, "./exp/train.arff", train_attr,
+                      test_attr)  # hdp should use the same test data splits as wpdp
+      result2 += call(train_src, "./exp/test.arff", train_attr,
+                      test_attr)  # test.arff and train.arff are both test case for hdp
   # if train_src == "": return []
   A = sorted(result1)
   B = sorted(result2)
-  result +=[A[-1]]
-  result +=[B[-1]]
+  result += [A[-1]]
+  result += [B[-1]]
   # print(result)
   return result
 
@@ -201,7 +205,7 @@ def testEQ():
   attr = content[0].split(",")
   inst = [list(tofloat(row.split(","))) for row in content[1:]]
   d2 = o(name="./datasetcsv/Relink/apache.csv", attr=attr, data=inst)
-  Result = KStest(d1,d2,train_src)
+  Result = KStest(d1, d2, train_src)
   print(Result)
   pdb.set_trace()
   print("DONE")
