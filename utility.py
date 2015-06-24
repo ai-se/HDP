@@ -225,7 +225,7 @@ def featureSelection(data, num_of_attributes):
   :return: data with selected feature
   :rtype: Instance
   """
-  search = ASSearch(classname="weka.attributeSelection.Ranker", options=["-D", "2", "-N", str(num_of_attributes)])
+  search = ASSearch(classname="weka.attributeSelection.Ranker", options=[ "-N", str(num_of_attributes)])
   evaluator = ASEvaluation(classname="weka.attributeSelection.ChiSquaredAttributeEval")
   attsel = AttributeSelection()
   attsel.search(search)
@@ -233,7 +233,7 @@ def featureSelection(data, num_of_attributes):
   attsel.select_attributes(data)
   # print("# attributes: " + str(attsel.number_attributes_selected))
   # print("attributes: " + str(attsel.selected_attributes))
-  # print("result string:\n" + attsel.results_string)
+  print("result string:\n" + attsel.results_string)
   for i in reversed(range(data.class_index)):  # delete feature
     if i not in attsel.selected_attributes:
       data.delete_attribute(i)

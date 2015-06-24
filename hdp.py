@@ -57,38 +57,47 @@ def maximumWeighted(match, target_lst, source_lst):
   return o(score=value, attr_source=attr_source, attr_target=attr_target)
 
 
-def KStest(d1, d2, sourcename, cutoff=0.05):
+def KStest(d_source, d_target, features, cutoff=0.05):
   """
   Kolmogorov-Smirnov Test
-  :param d1 : source data
-  :type d1 : o
-  :param d2: target data
-  :type d2: o
-  :param sourcename: src of source
-  :type sourcename : str
+  :param d_source : source data
+  :type d_source : o
+  :param d_target: target data
+  :type d_target: o
+  :param features: features selected for the source data set
+  :type features : list
   :return : results of maximumWeighted
   :rtype: o
   """
   match = {}
-  # pdb.set_trace()
-  A = loadWekaData(sourcename)
-  A_selected = featureSelection(A, int((A.class_index) * 0.15))
-  features = [str(i).split(" ")[1] for i in A_selected.attributes()][:-1]
-  source = transform(d1,features)
-  target = transform(d2)
-  # pdb.set_trace()
+  source = transform(d_source,features)
+  target = transform(d_target)
+  pdb.set_trace()
   target_lst, source_lst = [], []
-  for tar, val1 in target.iteritems():
-    for sou, val2 in source.iteritems():
+  for tar_feature, val1 in target.iteritems():
+    for sou_feature, val2 in source.iteritems():
       result = stats.ks_2samp(np.array(val1), np.array(val2))  # (a,b): b is p-value, zero means significantly different
       if result[1] > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
-        match[(sou, tar)] = result[1]
-        if tar not in target_lst:
-          target_lst.append(tar)
-        if sou not in source_lst:
-          source_lst.append(sou)
+        match[(sou_feature, tar_feature)] = result[1]
+        if tar_feature not in target_lst:
+          target_lst.append(tar_feature)
+        if sou_feature not in source_lst:
+          source_lst.append(sou_feature)
   return maximumWeighted(match, target_lst, source_lst)
+
+def attributeSelection(data):
+  feature_dict = {}
+  for key, lst in data.iteritems():
+    for source in lst:
+      source_name = "./dataset/" + key + "/" + source["name"][
+                                                      source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
+      A = loadWekaData(source_name)
+      A_selected = featureSelection(A, int(A.class_index* 0.15))
+      features_list = [str(i).split(" ")[1] for i in A_selected.attributes()][:-1]
+      feature_dict[source_name] = features_list
+  return feature_dict
+
 
 
 def KSanalyzer(data=read()):
@@ -101,21 +110,22 @@ def KSanalyzer(data=read()):
   """
   # data = read()
   best_pairs = []
-  for key, val in data.iteritems():
-    for target in val:
+  selected_features = attributeSelection(data)
+  for key, targetlst in data.iteritems():
+    for target in targetlst:
       temp_score = 0
       temp_best = None
-      for key1, val1 in data.iteritems():
+      for key1, sourcelst in data.iteritems():
         if key != key1:
-          for source in val1:
+          for source in sourcelst:
             source_name = "./dataset/" + key1 + "/" + source["name"][
                                                       source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
-            X = KStest(source, target,source_name).update(train_src=source_name, test_src=target_name)
-            # if X["score"] > temp_score:
-            #   temp_score = X["score"]
-            #   temp_best = X # it seems they use all feasible pairs, not the best one as I thought
-            best_pairs.append(X)
+            X = KStest(source, target,selected_features[source_name]).update(train_src=source_name, test_src=target_name)
+            if X["score"] > temp_score:
+              temp_score = X["score"]
+              temp_best = X # it seems they use all feasible pairs, not the best one as I thought
+      best_pairs.append(temp_best)
       # pdb.set_trace()
   return best_pairs
 
