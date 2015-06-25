@@ -47,8 +47,8 @@ def maximumWeighted(match, target_lst, source_lst):
   G = nx.Graph()
   for key, val in match.iteritems():
     G.add_edge(key[0] + "source", key[1] + "target", weight=val)  # add suffix to make it unique
-  Result = nx.max_weight_matching(G)
-  for key, val in Result.iteritems():  # in Results, (A:B) and (B:A) both exist
+  result = nx.max_weight_matching(G)
+  for key, val in result.iteritems():  # in Results, (A:B) and (B:A) both exist
     if key[:-6] in source_lst and val[:-6] in target_lst:
       attr_target.append(val[:-6])
       attr_source.append(key[:-6])
@@ -122,64 +122,58 @@ def KSanalyzer(data=read()):
             source_name = "./dataset/" + key1 + "/" + source["name"][
                                                       source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
-            X = KStest(source, target, selected_features[source_name]).update(train_src=source_name,
-                                                                              test_src=target_name)
+            X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
+                                                                              target_src=target_name)
             if X["score"] > temp_score:
               temp_score = X["score"]
               temp_best = X  # it seems they use all feasible pairs, not the best one as I thought
       best_pairs.append(temp_best)
-      # pdb.set_trace()
+  # pdb.set_trace()
   return best_pairs
 
 
-def call(train_src, test_src, train_attr, test_attr):
+def call(source_src, target_src, source_attr, target_attr):
   """
   call weka to perform learning and testing
   :param train: src of training data
   :type train: str
   :param test: src of testing data
   :type test: str
-  :param train_attr: matched feature for training data set
-  :type train_attr: list
-  :param test_attr: matched feature for testing data set
-  :type test_attr: list
+  :param source_attr: matched feature for training data set
+  :type source_attr: list
+  :param target_attr: matched feature for testing data set
+  :type target_attr: list
   :return ROC area value
   :rtype: list
   """
-  r = round(wekaCALL(train_src, test_src, train_attr, test_attr, True), 3)
+  r = round(wekaCALL(source_src, target_src, source_attr, target_attr, True), 3)
   if not math.isnan(r):
     return [r]
   else:
     return []
 
 
-def hdp(test_src, source_target_match):
+def hdp(target_src, source_target_match):
   """
    source_target_match = KSanalyzer()
-  :param test_src : src of test(target) data set
-  :type test_src : str
+  :param target_src : src of test(target) data set
+  :type target_src : str
   :param source_target_match : matched source and target data test
   :type source_target_match: list
   :return: value of ROC area
   :rtype: list
   """
-  result1, result2, result = [], [], []
-  test_name = test_src[test_src.rfind("/") + 1:test_src.rfind(".")]
+  result = []
+  target_name = target_src[target_src.rfind("/") + 1:target_src.rfind(".")]
   for i in source_target_match:
-    if i.test_src == test_name:  # for all
-      train_attr = i.attr_source
-      test_attr = i.attr_target
-      train_src = i.train_src
-      result1 += call(train_src, "./exp/train.arff", train_attr,
-                      test_attr)  # hdp should use the same test data splits as wpdp
-      result2 += call(train_src, "./exp/test.arff", train_attr,
-                      test_attr)  # test.arff and train.arff are both test case for hdp
-  # if train_src == "": return []
-  A = sorted(result1)
-  B = sorted(result2)
-  result += [A[-1]]
-  result += [B[-1]]
-  # print(result)
+    if i.target_src == target_name:  # for all
+      source_attr = i.attr_source
+      target_attr = i.attr_target
+      source_src = i.source_src
+      result += call(source_src, "./exp/train.arff", source_attr,
+                      target_attr)  # hdp should use the same test data splits as wpdp
+      result += call(source_src, "./exp/test.arff", source_attr,
+                      target_attr)  # test.arff and train.arff are both test case for hdp
   return result
 
 
@@ -191,8 +185,8 @@ def testEQ():
       except ValueError:
         yield x[:-1]
 
-  test_src = "./dataset/Relink/apache.arff"
-  train_src = "./dataset/AEEEM/EQ.arff"
+  target_src = "./dataset/Relink/apache.arff"
+  source_src = "./dataset/AEEEM/EQ.arff"
 
   d = open("./datasetcsv/AEEEM/EQ.csv", "r")
   content = d.readlines()
@@ -205,7 +199,7 @@ def testEQ():
   attr = content[0].split(",")
   inst = [list(tofloat(row.split(","))) for row in content[1:]]
   d2 = o(name="./datasetcsv/Relink/apache.csv", attr=attr, data=inst)
-  Result = KStest(d1, d2, train_src)
+  Result = KStest(d1, d2, source_src)
   print(Result)
   pdb.set_trace()
   print("DONE")

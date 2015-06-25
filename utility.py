@@ -149,15 +149,15 @@ def wekaExp(datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
   print(tester.multi_resultset_full(0, comparison_col))
 
 
-def wekaCALL(train_src, test_src, train_attr=[], test_attr=[], isHDP=False):
+def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
   """
   weka wrapper to train and test based on the datasets
-  :param train: traininng data
-  :type train: str(src)
-  :param test: testing data
-  :type test: str(src)
-  :param train_attr: features selected for building a learner
-  :type train_attr:list
+  :param source_src: src of traininng data
+  :type source_src: str
+  :param target_src: src of testing data
+  :type target_src: str
+  :param source_attr: features selected for building a learner
+  :type source_attr:list
   :param test_attr: features selected in target data to predict labels
   :type test_attr: list
   :param isHDP: flag
@@ -180,21 +180,19 @@ def wekaCALL(train_src, test_src, train_attr=[], test_attr=[], isHDP=False):
     for i in order[1:]:  # delete from big index, except for the class attribute
       data.delete_attribute(i)
     return data
-
-  train_data_raw = loadWekaData(train_src)
-  train_data = featureSelection(train_data_raw,int(train_data_raw.class_index*0.15))
-  test_data = loadWekaData(test_src)
+  source_data = loadWekaData(source_src)
+  target_data = loadWekaData(target_src)
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
   if isHDP:
     # pdb.set_trace()
-    train_del_attr = getIndex(train_data, train_attr)
-    test_del_attr = getIndex(test_data, test_attr)
-    train_data = delAttr(train_data, train_del_attr)
-    test_data = delAttr(test_data, test_del_attr)
-  cls.build_classifier(train_data)
-  eval = Evaluation(train_data)
-  eval.test_model(cls, test_data)
-  # test_data.num_attributes
+    source_del_attr = getIndex(source_data, source_attr)
+    target_del_attr = getIndex(target_data, test_attr)
+    source_data = delAttr(source_data, source_del_attr)
+    target_data = delAttr(target_data, target_del_attr)
+  cls.build_classifier(source_data)
+  eval = Evaluation(source_data)
+  eval.test_model(cls, target_data)
+  # target_data.num_attributes
   # print(eval.percent_correct)
   # print(eval.summary())
   # print(eval.class_details())
@@ -233,7 +231,7 @@ def featureSelection(data, num_of_attributes):
   attsel.select_attributes(data)
   # print("# attributes: " + str(attsel.number_attributes_selected))
   # print("attributes: " + str(attsel.selected_attributes))
-  print("result string:\n" + attsel.results_string)
+  # print("result string:\n" + attsel.results_string)
   for i in reversed(range(data.class_index)):  # delete feature
     if i not in attsel.selected_attributes:
       data.delete_attribute(i)
