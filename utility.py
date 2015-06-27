@@ -32,41 +32,6 @@ class o:
     return '{' + ' '.join(show) + '}'
 
 
-# def read1(src="./datasetcsv"):
-#   """
-#   read data from csv files, return all data in a dictionary
-#
-#   {'AEEEM':[{name ='./datasetcsv/SOFTLAB/ar6.csv'
-#              attributes=['ck_oo_numberOfPrivateMethods', 'LDHH_lcom', 'LDHH_fanIn'...]
-#              instances=[[.....],[.....]]},]
-#    'MORPH':....
-#    'NASA':....
-#    'Relink':....
-#    'SOFTLAB':....]
-#   }
-#
-#   """
-#
-#   def tofloat(lst):
-#     for x in lst:
-#       try:
-#         yield float(x)
-#       except ValueError:
-#         yield x[:-1]
-#
-#   data = {}
-#   folders = [i for i in listdir(src) if not isfile(i) and i != ".DS_Store"]
-#   for f in folders:
-#     path = join(src, f)
-#     for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
-#       d = open(val, "r")
-#       content = d.readlines()
-#       attr = content[0].split(",")
-#       inst = [list(tofloat(row.split(","))) for row in content[1:]]
-#       data[f] = data.get(f, []) + [o(name=val, attr=attr, data=inst)]
-#   return data
-
-
 def read(src="./dataset"):
   """
   read data from arff files, return all data in a dictionary
@@ -81,14 +46,14 @@ def read(src="./dataset"):
   }
   """
   data = {}
-  folders = [i for i in listdir(src) if not isfile(i) and i!= ".DS_Store"]
+  folders = [i for i in listdir(src) if not isfile(i) and i != ".DS_Store"]
   for f in folders:
     path = join(src, f)
-    for val in [join(path,i) for i in listdir(path) if i!=".DS_Store"]:
+    for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
       arff = loadWekaData(val)
-      attributes = [str(i).split(" ")[1] for i in arff.attributes()][:-1] # exclude the label
-      columns = [ arff.values(i) for i in range(arff.class_index)] # exclude the class label
-      data[f] = data.get(f,[]) +[o(name = val, attr = attributes, data = columns)]
+      attributes = [str(i).split(" ")[1] for i in arff.attributes()][:-1]  # exclude the label
+      columns = [arff.values(i) for i in range(arff.class_index)]  # exclude the class label
+      data[f] = data.get(f, []) + [o(name=val, attr=attributes, data=columns)]
   return data
 
 
@@ -105,42 +70,7 @@ def readsrc(src="./dataset"):
   subfolder = [join(src, i) for i in listdir(src) if not isfile(join(src, i))]
   for one in subfolder:
     data[one] = [join(one, i) for i in listdir(one) if isfile(join(one, i)) and i != ".DS_Store"]
-  # print(data)
   return data
-
-
-# def readarff(src="./dataset/AEEEM/EQ.arff"):
-#   """
-#   read each arff and return header and content
-#   :param src: src of arff file
-#   :type src : str
-#   :return: header and content of each arff file
-#   :rtype:tuple (str, list)
-#   """
-#   f = open(src, "r")
-#   content, arffheader = [], []
-#   while True:
-#     line = f.readline()
-#     if not line:
-#       break
-#     elif "@" in line:
-#       arffheader += [line]
-#       if "data" in line:
-#         continue
-#     else:
-#       if len(line) < 10:
-#         continue
-#       if line[-1] != "\n":
-#         line += "\n"
-#       content += [line]
-#   return "".join(arffheader), content
-#
-#
-# def writearff(data, name, src="./exp"):
-#   """
-#   """
-#   wf = open(src + "/" + name + ".arff", "w")
-#   wf.write(data)
 
 
 def loadWekaData(src):
@@ -149,29 +79,6 @@ def loadWekaData(src):
   data = loader.load_file(src)
   data.class_is_last()
   return data
-
-
-def wekaExp(datasets=["./dataset/SOFTLAB/ar3.arff"], run=500, fold=2):
-  if not jvm.started: jvm.start()
-  classifiers = [Classifier(classname="weka.classifiers.functions.Logistic")]
-  result = "exp.arff"
-  exp = SimpleCrossValidationExperiment(classification=True, runs=run, folds=fold, datasets=datasets,
-    classifiers=classifiers, result=result)
-  exp.setup()
-  exp.run()
-  loader = weka.core.converters.loader_for_file(result)
-  data = loader.load_file(result)
-  from weka.experiments import Tester, ResultMatrix
-
-  matrix = ResultMatrix(classname="weka.experiment.ResultMatrixPlainText")
-  tester = Tester(classname="weka.experiment.PairedCorrectedTTester")
-  tester.resultmatrix = matrix
-  # comparison_col = data.attribute_by_name("Percent_correct").index
-  comparison_col = data.attribute_by_name("Area_under_ROC").index
-  tester.instances = data
-  pdb.set_trace()
-  print(tester.header(comparison_col))
-  print(tester.multi_resultset_full(0, comparison_col))
 
 
 def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
@@ -205,6 +112,7 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
     for i in order[1:]:  # delete from big index, except for the class attribute
       data.delete_attribute(i)
     return data
+
   source_data = loadWekaData(source_src)
   target_data = loadWekaData(target_src)
   cls = Classifier(classname="weka.classifiers.functions.Logistic")
@@ -225,7 +133,8 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
   return eval.area_under_roc(1)
 
 
-def filter(data, toSave = False,file_name = "test",filter_name="weka.filters.unsupervised.attribute.Remove", option=["-R", "first-3,last"]):
+def filter(data, toSave=False, file_name="test", filter_name="weka.filters.unsupervised.attribute.Remove",
+           option=["-R", "first-3,last"]):
   # remove = Filter(classname="weka.filters.unsupervised.attribute.Remove", options = option)
   # option = ["-N","2","-F","2","-S","1"]
   remove = Filter(classname=filter_name, options=option)
@@ -233,7 +142,7 @@ def filter(data, toSave = False,file_name = "test",filter_name="weka.filters.uns
   filtered = remove.filter(data)
   if toSave:
     saver = Saver(classname="weka.core.converters.ArffSaver")
-    saver.save_file(filtered,"./exp/"+file_name+".arff")
+    saver.save_file(filtered, "./exp/" + file_name + ".arff")
   # print(filtered)
   return filtered
 
@@ -248,8 +157,9 @@ def featureSelection(data, num_of_attributes):
   :return: data with selected feature
   :rtype: Instance
   """
-  search = ASSearch(classname="weka.attributeSelection.Ranker", options=[ "-N", str(num_of_attributes)])
-  evaluator = ASEvaluation(classname="weka.attributeSelection.ReliefFAttributeEval", options=["-M","-1","-D","1","-K","10"])
+  search = ASSearch(classname="weka.attributeSelection.Ranker", options=["-N", str(num_of_attributes)])
+  evaluator = ASEvaluation(classname="weka.attributeSelection.ReliefFAttributeEval",
+                           options=["-M", "-1", "-D", "1", "-K", "10"])
   attsel = AttributeSelection()
   attsel.search(search)
   attsel.evaluator(evaluator)

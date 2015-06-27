@@ -1,16 +1,10 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
-import pdb
 import random, math
 from utility import *
-import operator
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import auc
-from sklearn.metrics import roc_curve, roc_auc_score
 from scipy import stats
 import numpy as np
 import networkx as nx
-
 
 def transform(d, selected=[]):
   """
@@ -21,14 +15,14 @@ def transform(d, selected=[]):
   :type col: dict
   """
   col = {}
-  for val, attr in zip(d["data"],d["attr"]):
+  for val, attr in zip(d["data"], d["attr"]):
     if len(selected) == 0:
       col[attr] = val
     elif attr in selected:
       col[attr] = val
   return col
   # for row in d["data"]:
-  #   for attr, cell in zip(d["attr"][:-1], row[:-1]):  # exclude last columm, $bug
+  # for attr, cell in zip(d["attr"][:-1], row[:-1]):  # exclude last columm, $bug
   #     if len(selected) != 0 and attr not in selected:  # get rid of name, version columns.
   #       continue  # if this is for feature selected data, just choose those features.
   #     col[attr] = col.get(attr, []) + [cell]
@@ -82,6 +76,7 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
       result = stats.ks_2samp(np.array(val1), np.array(val2))  # (a,b): b is p-value, zero means significantly different
+      # result = mytest.kolmogorovSmirnovTest(val1,val2)
       if result[1] > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou_feature, tar_feature)] = result[1]
@@ -90,7 +85,7 @@ def KStest(d_source, d_target, features, cutoff=0.05):
         if sou_feature not in source_lst:
           source_lst.append(sou_feature)
   if len(match) < 1:
-    return o(score = 0)
+    return o(score=0)
   return maximumWeighted(match, target_lst, source_lst)
 
 
@@ -98,8 +93,7 @@ def attributeSelection(data):
   feature_dict = {}
   for key, lst in data.iteritems():
     for source in lst:
-      source_name = "./dataset/" + key + "/" + source["name"][
-                                               source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
+      source_name = source["name"]
       A = loadWekaData(source_name)
       A_selected = featureSelection(A, int(A.class_index * 0.15))
       features_list = [str(i).split(" ")[1] for i in A_selected.attributes()][:-1]
@@ -107,7 +101,7 @@ def attributeSelection(data):
   return feature_dict
 
 
-def KSanalyzer(data=read(),cutoff = 0.05):
+def KSanalyzer(cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
   :param data : read data from arff
@@ -115,7 +109,7 @@ def KSanalyzer(data=read(),cutoff = 0.05):
   :return pairs of matched data
   :rtype: list
   """
-  # data = read()
+  data = read()
   best_pairs = []
   selected_features = attributeSelection(data)
   for target_group, targetlst in data.iteritems():
@@ -123,14 +117,13 @@ def KSanalyzer(data=read(),cutoff = 0.05):
       for source_group, sourcelst in data.iteritems():
         if target_group != source_group:
           for source in sourcelst:
-            source_name = "./dataset/" + source_group + "/" + source["name"][
-                                                      source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
-            target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
-            X = KStest(source, target, selected_features[source_name]).update(
-                source_src=source_name,group = source_group,target_src=target_name)
+            source_name = source["name"]
+            target_name = target["name"]
+            X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
+              group=source_group, target_src=target_name)
             if X["score"] > cutoff:
               best_pairs.append(X)
-  # pdb.set_trace()
+  pdb.set_trace()
   return best_pairs
 
 
@@ -166,14 +159,14 @@ def hdp(target_src, source_target_match):
   :rtype: list
   """
   result = []
-  target_name = target_src[target_src.rfind("/") + 1:target_src.rfind(".")]
+  target_name = target_src
   for i in source_target_match:
     if i.target_src == target_name:  # for all
       source_attr = i.attr_source
       target_attr = i.attr_target
       source_src = i.source_src
-      result.append(o(result = call(source_src, "./exp/train.arff",source_attr,target_attr),source_src = source_src))
-      result.append(o(result = call(source_src, "./exp/test.arff",source_attr,target_attr),source_src = source_src))
+      result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=source_src))
+      result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=source_src))
   return result
 
 
