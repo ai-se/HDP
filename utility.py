@@ -32,9 +32,44 @@ class o:
     return '{' + ' '.join(show) + '}'
 
 
-def read(src="./datasetcsv"):
+# def read1(src="./datasetcsv"):
+#   """
+#   read data from csv files, return all data in a dictionary
+#
+#   {'AEEEM':[{name ='./datasetcsv/SOFTLAB/ar6.csv'
+#              attributes=['ck_oo_numberOfPrivateMethods', 'LDHH_lcom', 'LDHH_fanIn'...]
+#              instances=[[.....],[.....]]},]
+#    'MORPH':....
+#    'NASA':....
+#    'Relink':....
+#    'SOFTLAB':....]
+#   }
+#
+#   """
+#
+#   def tofloat(lst):
+#     for x in lst:
+#       try:
+#         yield float(x)
+#       except ValueError:
+#         yield x[:-1]
+#
+#   data = {}
+#   folders = [i for i in listdir(src) if not isfile(i) and i != ".DS_Store"]
+#   for f in folders:
+#     path = join(src, f)
+#     for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
+#       d = open(val, "r")
+#       content = d.readlines()
+#       attr = content[0].split(",")
+#       inst = [list(tofloat(row.split(","))) for row in content[1:]]
+#       data[f] = data.get(f, []) + [o(name=val, attr=attr, data=inst)]
+#   return data
+
+
+def read(src="./dataset"):
   """
-  read data from csv files, return all data in a dictionary
+  read data from arff files, return all data in a dictionary
 
   {'AEEEM':[{name ='./datasetcsv/SOFTLAB/ar6.csv'
              attributes=['ck_oo_numberOfPrivateMethods', 'LDHH_lcom', 'LDHH_fanIn'...]
@@ -44,26 +79,16 @@ def read(src="./datasetcsv"):
    'Relink':....
    'SOFTLAB':....]
   }
-
   """
-
-  def tofloat(lst):
-    for x in lst:
-      try:
-        yield float(x)
-      except ValueError:
-        yield x[:-1]
-
   data = {}
-  folders = [i for i in listdir(src) if not isfile(i) and i != ".DS_Store"]
+  folders = [i for i in listdir(src) if not isfile(i) and i!= ".DS_Store"]
   for f in folders:
     path = join(src, f)
-    for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
-      d = open(val, "r")
-      content = d.readlines()
-      attr = content[0].split(",")
-      inst = [list(tofloat(row.split(","))) for row in content[1:]]
-      data[f] = data.get(f, []) + [o(name=val, attr=attr, data=inst)]
+    for val in [join(path,i) for i in listdir(path) if i!=".DS_Store"]:
+      arff = loadWekaData(val)
+      attributes = [str(i).split(" ")[1] for i in arff.attributes()][:-1] # exclude the label
+      columns = [ arff.values(i) for i in range(arff.class_index)] # exclude the class label
+      data[f] = data.get(f,[]) +[o(name = val, attr = attributes, data = columns)]
   return data
 
 
@@ -84,38 +109,38 @@ def readsrc(src="./dataset"):
   return data
 
 
-def readarff(src="./dataset/AEEEM/EQ.arff"):
-  """
-  read each arff and return header and content
-  :param src: src of arff file
-  :type src : str
-  :return: header and content of each arff file
-  :rtype:tuple (str, list)
-  """
-  f = open(src, "r")
-  content, arffheader = [], []
-  while True:
-    line = f.readline()
-    if not line:
-      break
-    elif "@" in line:
-      arffheader += [line]
-      if "data" in line:
-        continue
-    else:
-      if len(line) < 10:
-        continue
-      if line[-1] != "\n":
-        line += "\n"
-      content += [line]
-  return "".join(arffheader), content
-
-
-def writearff(data, name, src="./exp"):
-  """
-  """
-  wf = open(src + "/" + name + ".arff", "w")
-  wf.write(data)
+# def readarff(src="./dataset/AEEEM/EQ.arff"):
+#   """
+#   read each arff and return header and content
+#   :param src: src of arff file
+#   :type src : str
+#   :return: header and content of each arff file
+#   :rtype:tuple (str, list)
+#   """
+#   f = open(src, "r")
+#   content, arffheader = [], []
+#   while True:
+#     line = f.readline()
+#     if not line:
+#       break
+#     elif "@" in line:
+#       arffheader += [line]
+#       if "data" in line:
+#         continue
+#     else:
+#       if len(line) < 10:
+#         continue
+#       if line[-1] != "\n":
+#         line += "\n"
+#       content += [line]
+#   return "".join(arffheader), content
+#
+#
+# def writearff(data, name, src="./exp"):
+#   """
+#   """
+#   wf = open(src + "/" + name + ".arff", "w")
+#   wf.write(data)
 
 
 def loadWekaData(src):
@@ -224,7 +249,7 @@ def featureSelection(data, num_of_attributes):
   :rtype: Instance
   """
   search = ASSearch(classname="weka.attributeSelection.Ranker", options=[ "-N", str(num_of_attributes)])
-  evaluator = ASEvaluation(classname="weka.attributeSelection.ChiSquaredAttributeEval")
+  evaluator = ASEvaluation(classname="weka.attributeSelection.ReliefFAttributeEval", options=["-M","-1","-D","1","-K","10"])
   attsel = AttributeSelection()
   attsel.search(search)
   attsel.evaluator(evaluator)
@@ -240,10 +265,11 @@ def featureSelection(data, num_of_attributes):
 
 
 if __name__ == "__main__":
-  if not jvm.started: jvm.start()
-  loader = Loader(classname="weka.core.converters.ArffLoader")
-  data = loader.load_file("./dataset/AEEEM/EQ.arff")
-  data.class_is_last()
-  featureSelection(data, 9)
+  read()
+  # if not jvm.started: jvm.start()
+  # loader = Loader(classname="weka.core.converters.ArffLoader")
+  # data = loader.load_file("./dataset/AEEEM/EQ.arff")
+  # data.class_is_last()
+  # featureSelection(data, 9)
   # filter()
   # filter()

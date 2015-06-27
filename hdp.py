@@ -21,12 +21,18 @@ def transform(d, selected=[]):
   :type col: dict
   """
   col = {}
-  for row in d["data"]:
-    for attr, cell in zip(d["attr"][:-1], row[:-1]):  # exclude last columm, $bug
-      if len(selected) != 0 and attr not in selected:  # get rid of name, version columns.
-        continue  # if this is for feature selected data, just choose those features.
-      col[attr] = col.get(attr, []) + [cell]
+  for val, attr in zip(d["data"],d["attr"]):
+    if len(selected) == 0:
+      col[attr] = val
+    elif attr in selected:
+      col[attr] = val
   return col
+  # for row in d["data"]:
+  #   for attr, cell in zip(d["attr"][:-1], row[:-1]):  # exclude last columm, $bug
+  #     if len(selected) != 0 and attr not in selected:  # get rid of name, version columns.
+  #       continue  # if this is for feature selected data, just choose those features.
+  #     col[attr] = col.get(attr, []) + [cell]
+  # return col
 
 
 def maximumWeighted(match, target_lst, source_lst):
@@ -101,10 +107,10 @@ def attributeSelection(data):
   return feature_dict
 
 
-def KSanalyzer(data=read()):
+def KSanalyzer(data=read(),cutoff = 0.05):
   """
   for each target data set, find a best source data set in terms of p-values
-  :param data : read csv format of data
+  :param data : read data from arff
   :type data : o
   :return pairs of matched data
   :rtype: list
@@ -112,22 +118,18 @@ def KSanalyzer(data=read()):
   # data = read()
   best_pairs = []
   selected_features = attributeSelection(data)
-  for key, targetlst in data.iteritems():
+  for target_group, targetlst in data.iteritems():
     for target in targetlst:
-      temp_score = 0
-      temp_best = None
-      for key1, sourcelst in data.iteritems():
-        if key != key1:
+      for source_group, sourcelst in data.iteritems():
+        if target_group != source_group:
           for source in sourcelst:
-            source_name = "./dataset/" + key1 + "/" + source["name"][
+            source_name = "./dataset/" + source_group + "/" + source["name"][
                                                       source["name"].rfind("/") + 1:source["name"].rfind(".")] + ".arff"
             target_name = target["name"][target["name"].rfind("/") + 1:target["name"].rfind(".")]
-            X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
-                                                                              target_src=target_name)
-            if X["score"] > temp_score:
-              temp_score = X["score"]
-              temp_best = X  # it seems they use all feasible pairs, not the best one as I thought
-      best_pairs.append(temp_best)
+            X = KStest(source, target, selected_features[source_name]).update(
+                source_src=source_name,group = source_group,target_src=target_name)
+            if X["score"] > cutoff:
+              best_pairs.append(X)
   # pdb.set_trace()
   return best_pairs
 
@@ -170,10 +172,8 @@ def hdp(target_src, source_target_match):
       source_attr = i.attr_source
       target_attr = i.attr_target
       source_src = i.source_src
-      result += call(source_src, "./exp/train.arff", source_attr,
-                      target_attr)  # hdp should use the same test data splits as wpdp
-      result += call(source_src, "./exp/test.arff", source_attr,
-                      target_attr)  # test.arff and train.arff are both test case for hdp
+      result.append(o(result = call(source_src, "./exp/train.arff",source_attr,target_attr),source_src = source_src))
+      result.append(o(result = call(source_src, "./exp/test.arff",source_attr,target_attr),source_src = source_src))
   return result
 
 
