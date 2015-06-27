@@ -168,7 +168,7 @@ def featureSelection(data, num_of_attributes):
   # print("attributes: " + str(attsel.selected_attributes))
   # print("result string:\n" + attsel.results_string)
   for i in reversed(range(data.class_index)):  # delete feature
-    if i not in attsel.selected_attributes:
+    if i not in attsel.selected_attributes[:num_of_attributes]:# HERE found a bug in weka, will always return num+1 attributes
       data.delete_attribute(i)
   # pdb.set_trace()
   return data
