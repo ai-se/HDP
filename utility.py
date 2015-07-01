@@ -1,40 +1,15 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import jnius_config
+
 jnius_config.add_options('-Xrs', '-Xmx4096')
-jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar','/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar')
+jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
+                           '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar')
 import pdb
 import random
 from os import listdir
 from os.path import isfile, join
 from jnius import autoclass
-
-#
-#
-#
-#
-#
-#
-# import weka.core.Instances
-# import java.io.BufferedReader
-# import java.io.FileReader
-# import weka.attributeSelection.Ranker as Ranker
-# import weka.attributeSelection.ReliefFAttributeEval as ReliefFAttributeEval
-# import weka.attributeSelection.AttributeSelection as attributeSelection
-# import weka.classifiers.functions.Logistic as Logistic
-# import weka.classifiers.Evaluation as Evaluation
-# import weka.core.converters.ArffSaver as Saver
-# import weka.filters.unsupervised.attribute.Remove as Remove
-# import weka.filters.unsupervised.instance.Randomize as Randomize
-# import weka.filters.unsupervised.instance.RemoveFolds as RemoveFolds
-
-# import weka.core.jvm as jvm
-# import weka.core.converters
-# from weka.core.converters import Loader, Saver
-# from weka.classifiers import Classifier, Evaluation
-# from weka.experiments import SimpleCrossValidationExperiment
-# from weka.filters import Filter
-# from weka.attribute_selection import ASSearch, ASEvaluation, AttributeSelection
 
 
 class o:
@@ -57,10 +32,11 @@ class o:
 
 
 def enumerateToList(enum):
-  result =[]
+  result = []
   while enum.hasMoreElements():
     result.append(enum.nextElement().toString())
   return result
+
 
 def read(src="./dataset"):
   """
@@ -106,7 +82,7 @@ def readsrc(src="./dataset"):
 def loadWekaData(src):
   source = autoclass('weka.core.converters.ConverterUtils$DataSource')(src)
   data = source.getDataSet()
-  data.setClassIndex(data.numAttributes()-1)
+  data.setClassIndex(data.numAttributes() - 1)
   return data
 
 
@@ -169,14 +145,14 @@ def filter(data, toSave=False, file_name="test", filter_name="weka.filters.unsup
   # option = ["-N","2","-F","2","-S","1"]
   remove = None
   filter = autoclass('weka.filters.AllFilter')
-  if toSave: # removeFolds
+  if toSave:  # removeFolds
     remove = autoclass('weka.filters.unsupervised.instance.RemoveFolds')()
   else:
     remove = autoclass('weka.filters.unsupervised.instance.Randomize')()
   remove.setOptions(option)
   remove.setInputFormat(data)
   # remove.input(data)
-  filtered = filter.useFilter(data,remove)
+  filtered = filter.useFilter(data, remove)
   if toSave:
     saver = autoclass('weka.core.converters.ArffSaver')()
     saver.setInstances(filtered)
@@ -200,13 +176,14 @@ def featureSelection(data, num_of_attributes):
   search = autoclass('weka.attributeSelection.Ranker')()
   evaluator = autoclass('weka.attributeSelection.ReliefFAttributeEval')()
   attsel = autoclass('weka.attributeSelection.AttributeSelection')()
-  search.setOptions(['-N',str(num_of_attributes)])
+  search.setOptions(['-N', str(num_of_attributes)])
   attsel.setSearch(search)
   attsel.setEvaluator(evaluator)
   attsel.SelectAttributes(data)
   features = attsel.selectedAttributes()[:num_of_attributes]
-  index = [i-1 for i in features] # for some reason, weka return index form 1-based not zero-based
+  index = [i - 1 for i in features]  # for some reason, weka return index form 1-based not zero-based
   return index
+
 
 if __name__ == "__main__":
   read()

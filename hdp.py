@@ -43,36 +43,6 @@ def maximumWeighted(match, target_lst, source_lst):
   :return : matched metrics as well as corresponding values
   :rtype: class o
   """
-  # edges,track =[],[]
-  # value = 0
-  # attr_source, attr_target = [], []
-  # for key , val in match.iteritems():
-  #   edges.append((2*int(source_lst.index(key[0])),2*int(target_lst.index(key[1]))+1,val))
-  #   track+=[key[0],key[1]]
-  # result = maxWeightMatching(edges)
-  # print(result)
-  # for node in result:
-  #   if node != -1:
-  #     if track[node] in source_lst:
-  #       attr_source.append(track[node])
-  #     elif track[node] in target_lst:
-  #       attr_target.append(track[node])
-  # for source, target in zip(attr_source,attr_target):
-  #   value +=match[(source,target)]
-  # # pdb.set_trace()
-  # return o(score=value, attr_source=attr_source, attr_target=attr_target)
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-  #
-
-  pdb.set_trace()
   value = 0
   attr_source, attr_target = [], []
   G = nx.Graph()
@@ -156,7 +126,7 @@ def KSanalyzer(cutoff=0.05):
               group=source_group, target_src=target_name)
             if X["score"] > cutoff:
               best_pairs.append(X)
-  pdb.set_trace()
+  # pdb.set_trace()
   return best_pairs
 
 
@@ -227,7 +197,7 @@ def testEQ():
   d2 = o(name="./datasetcsv/Relink/apache.csv", attr=attr, data=inst)
   Result = KStest(d1, d2, source_src)
   print(Result)
-  pdb.set_trace()
+  # pdb.set_trace()
   print("DONE")
 
 

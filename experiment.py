@@ -56,7 +56,7 @@ def process(match, target_src, result):
 
 def run():
   datasrc = readsrc()
-  # source_target_match = KSanalyzer()
+  # source_target_match = KSanalyzer() # to do online test ,you need to uncomment
   source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
     for one in srclst:
@@ -77,10 +77,6 @@ def run():
         else:
           out_hdp += temp
       process(source_target_match, one, out_hdp)
-      # re_sorted = sorted(out_hdp)
-      # print(one, "===>", re_sorted[int(len(re_sorted) * 0.5)])
-      # pdb.set_trace()
-      # print("next=======>")
 
 
 if __name__ == "__main__":
