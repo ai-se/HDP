@@ -37,7 +37,7 @@
 @attribute NUMBER_OF_LINES numeric
 @attribute PERCENT_COMMENTS numeric
 @attribute LOC_TOTAL numeric
-@attribute Defective {buggy,clean}
+@attribute class {buggy,clean}
 
 @data
 48,57,11,61,32,106,29,0.13,50,2.12,22,0.76,161,27,0.93,165,3,204.29,41.72,355647.88,2.84,1112,0.02,19758.22,8523.85,0.93,28,53,134,0.09,463,649,172,31,307,36.05,226,clean

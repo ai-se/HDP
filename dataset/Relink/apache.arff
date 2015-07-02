@@ -26,7 +26,7 @@
 @attribute SumCyclomaticModified numeric
 @attribute SumCyclomaticStrict numeric
 @attribute SumEssential numeric
-@attribute isDefective {buggy,clean}
+@attribute class {buggy,clean}
 
 @data
 12,11,14,4,82,5,61,7,2195,165,1185,191,907,328,719,916,178,738,51,51,56,0.28,221,197,246,81,buggy

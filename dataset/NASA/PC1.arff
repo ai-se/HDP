@@ -21,7 +21,7 @@
 @attribute total_Op numeric
 @attribute total_Opnd numeric
 @attribute branchCount numeric
-@attribute defects {clean,buggy}
+@attribute class {buggy,clean}
 
 @data
 

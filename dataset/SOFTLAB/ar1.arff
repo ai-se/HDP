@@ -29,7 +29,7 @@
 @attribute design_density numeric
 @attribute normalized_cyclomatic_complexity numeric
 @attribute formal_parameters numeric
-@attribute defects {clean,buggy}
+@attribute class {buggy,clean}
 
 @data 
 7,0,4,0,3,8,6,10,12,14,22,58,0.27,3.7,214.81,0.02,11.93,0,0,0,0,0,1,0.33,0,0,0,0.14,0,clean
