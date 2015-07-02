@@ -102,7 +102,6 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
   :return: AUC
   :rtype: float
   """
-
   def getIndex(data, used_attr):
     # pdb.set_trace()
     del_attr = []
@@ -114,7 +113,7 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
 
   def delAttr(data, index):
     order = sorted(index, reverse=True)
-    for i in order[1:]:  # delete from big index, except for the class attribute
+    for i in order[:]:  # delete from big index, except for the class attribute
       data.deleteAttributeAt(i)
     return data
 
