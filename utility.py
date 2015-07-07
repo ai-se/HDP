@@ -7,6 +7,8 @@ jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
                            '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar')
 import pdb
 import random
+import shutil
+import os
 from os import listdir
 from os.path import isfile, join
 from jnius import autoclass
@@ -183,9 +185,38 @@ def featureSelection(data, num_of_attributes):
   index = [i - 1 for i in features]  # for some reason, weka return index form 1-based not zero-based
   return index
 
+def PCA(data_src="",ratio = 0.3):
+  def createfolder(src):
+    new_src = "./R"+src
+    if os.path.exists(new_src):
+      return
+    else:
+      os.makedirs(new_src) # generate new folders for each file
+
+  data = loadWekaData(data_src)
+  search = autoclass('weka.attributeSelection.Ranker')()
+  evaluator = autoclass('weka.attributeSelection.PrincipalComponents')()
+  evaluator.setOptions(['-R','0.9','-A','1'])
+  attsel = autoclass('weka.attributeSelection.AttributeSelection')()
+  attsel.setSearch(search)
+  attsel.setEvaluator(evaluator)
+  attsel.SelectAttributes(data)
+  reduced_data = attsel.reduceDimensionality(data)
+  createfolder(data_src[2:data_src.rfind("/")])
+  saver = autoclass('weka.core.converters.ArffSaver')()
+  saver.setInstances(reduced_data)
+  saver.setFile(autoclass("java.io.File")("./R" + data_src[2:]))
+  saver.writeBatch()
+
+def runPCA():
+  datasrc = readsrc()
+  for group, srclst in datasrc.iteritems():
+    for one in srclst:
+      PCA(one)
+  return "./Rdataset"
 
 if __name__ == "__main__":
-  read()
+  # read()
   # if not jvm.started: jvm.start()
   # loader = Loader(classname="weka.core.converters.ArffLoader")
   # data = loader.load_file("./dataset/AEEEM/EQ.arff")
@@ -193,3 +224,4 @@ if __name__ == "__main__":
   # featureSelection(data, 9)
   # filter()
   # filter()
+  PCA("./dataset/AEEEM/EQ.arff")
