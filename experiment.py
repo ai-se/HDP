@@ -57,7 +57,7 @@ def process(match, target_src, result):
 def run(src="./dataset"):
   src = runPCA()
   datasrc = readsrc(src)
-  source_target_match = KSanalyzer() # to do online test ,you need to uncomment
+  source_target_match = KSanalyzer(src) # to do online test ,you need to uncomment
   pdb.set_trace()
   # source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
