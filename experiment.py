@@ -54,10 +54,12 @@ def process(match, target_src, result):
   return total_median
 
 
-def run():
-  datasrc = readsrc()
-  # source_target_match = KSanalyzer() # to do online test ,you need to uncomment
-  source_target_match = readMatch()
+def run(src="./dataset"):
+  src = runPCA()
+  datasrc = readsrc(src)
+  source_target_match = KSanalyzer() # to do online test ,you need to uncomment
+  pdb.set_trace()
+  # source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
     for one in srclst:
       random.seed(1)
