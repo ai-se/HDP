@@ -104,15 +104,15 @@ def attributeSelection(data):
   return feature_dict
 
 
-def KSanalyzer(cutoff=0.05):
+def KSanalyzer(src, cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
-  :param data : read data from arff
-  :type data : o
+  :param src : src of KS test data
+  :type src : str
   :return pairs of matched data
   :rtype: list
   """
-  data = read()
+  data = read(src)
   best_pairs = []
   selected_features = attributeSelection(data)
   for target_group, targetlst in data.iteritems():
