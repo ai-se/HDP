@@ -1,6 +1,5 @@
 # __author__ = 'WeiFu'
 from __future__ import division, print_function
-import sys
 from utility import *
 from wpdp import *
 from cpdp import *
@@ -55,9 +54,10 @@ def process(match, target_src, result):
 
 
 def run(src="./dataset"):
-  src = runPCA()
+  # src = runPCA()
   datasrc = readsrc(src)
-  source_target_match = KSanalyzer(src) # to do online test ,you need to uncomment
+  source_target_match = KSanalyzer(src,[])
+  # source_target_match = KSanalyzer(src, ["-S","L","-T","L","-N",200]) # to do online test ,you need to uncomment
   pdb.set_trace()
   # source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
