@@ -1,6 +1,9 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import jnius_config
+jnius_config.add_options('-Xrs', '-Xmx6096')
+jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
+                           '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar')
 import pdb
 jnius_config.add_options('-Xrs', '-Xmx4096')
 jnius_config.set_classpath('.', '/Users/FuWei/Github/HDP/jar/weka.jar',
@@ -109,8 +112,8 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
     # pdb.set_trace()
     del_attr = []
     for k, attr in enumerate(enumerateToList(data.enumerateAttributes())):
-      temp = str(attr).split(" ")
-      if temp[1] not in used_attr:
+      temp= str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
+      if temp not in used_attr:
         del_attr += [k]
     return del_attr
 
