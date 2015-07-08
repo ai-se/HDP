@@ -1,10 +1,8 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
-import random, math
+import math
 from utility import *
-# import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest as KS
-# from bipartite import maxWeightMatching
-# from scipy import stats
+from scipy import stats
 import numpy as np
 import networkx as nx
 
@@ -77,9 +75,7 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
-      result = test.kolmogorovSmirnovTest(val1,val2)
-      print(result)
-      # result = mytest.kolmogorovSmirnovTest(val1,val2)
+      result = test.kolmogorovSmirnovTest(val1, val2)
       if result > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou_feature, tar_feature)] = result
@@ -99,12 +95,13 @@ def attributeSelection(data):
       source_name = source["name"]
       A = loadWekaData(source_name)
       A_selected_index = featureSelection(A, int(int(A.classIndex()) * 0.15))
-      features_list = [str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
-                       for i,attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
+      features_list = [str(attr)[str(attr).find("@attribute") + len("@attribute") + 1:str(attr).find("numeric") - 1]
+                       for i, attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
       feature_dict[source_name] = features_list
   return feature_dict
 
-def selectRows(data,option):
+
+def selectRows(old_data, option):
   """
   to do supervised or unsupervised instance selection
   :param data: the original data
@@ -113,18 +110,19 @@ def selectRows(data,option):
   :type option: list
 
   """
+  if len(option) == 0: return old_data
   i = 0
-  while option[i]:
-    pdb.set_trace()
-    if option[i] == "-S" and option[i+1] == "S":
+  while i<=4:
+    if (option[i] == "-S" and option[i + 1] == "S") or (option[i] == "-T" and option[i + 1] == "S"):
+      if isinstance(option[option.index("-N") + 1], int):
+        return selectInstances(old_data, option)
+      else:
+        raise ValueError("Should indicate an int number of intances")
+    i += 2
+  if i == 2: return old_data
 
 
-
-
-
-
-
-def KSanalyzer(src, option, cutoff=0.05):
+def KSanalyzer(src, option=[], cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
   :param src : src of KS test data
@@ -144,12 +142,15 @@ def KSanalyzer(src, option, cutoff=0.05):
           for source in sourcelst:
             source_name = source["name"]
             target_name = target["name"]
-            if len(option)>=2: # select some rows for KS test
-              pdb.set_trace()
-              source = selectRows(source,option)
+            if len(option) >= 2:  # select some rows for KS test
+              source = selectRows(source, option)
               target = selectRows(target, option)
+              print(len(source.data[0]))
+              print(len(target.data[0]))
+              pdb.set_trace()
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
-              group=source_group, target_src=target_name)
+                                                                              group=source_group,
+                                                                              target_src=target_name)
             if X["score"] > cutoff:
               best_pairs.append(X)
   # pdb.set_trace()
@@ -237,6 +238,3 @@ if __name__ == "__main__":
   # cpdp()
   # readarff()
   testEQ()
-
-
-
