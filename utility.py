@@ -1,17 +1,18 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import jnius_config
-
-jnius_config.add_options('-Xrs', '-Xmx4096')
-jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
-                           '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar')
 import pdb
+jnius_config.add_options('-Xrs', '-Xmx4096')
+jnius_config.set_classpath('.', '/Users/FuWei/Github/HDP/jar/weka.jar',
+                           '/Users/FuWei/Github/HDP/jar/commons-math3-3.5/commons-math3-3.5.jar')
+
 import random
 import shutil
 import os
 from os import listdir
 from os.path import isfile, join
 from jnius import autoclass
+
 
 
 class o:

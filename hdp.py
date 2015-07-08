@@ -103,12 +103,33 @@ def attributeSelection(data):
       feature_dict[source_name] = features_list
   return feature_dict
 
+def selectRows(data,option):
+  """
+  to do supervised or unsupervised instance selection
+  :param data: the original data
+  :type data : o
+  :param option: options to indicate kind of instance selection
+  :type option: list
 
-def KSanalyzer(src, cutoff=0.05):
+  """
+  i = 0
+  while option[i]:
+    pdb.set_trace()
+    if option[i] == "-S" and option[i+1] == "S":
+
+
+
+
+
+
+
+def KSanalyzer(src, option, cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
   :param src : src of KS test data
   :type src : str
+  :param option: set the Large or small data set for KS test, here small means using unsupervised or supervised methods to select rows
+  :type option: list
   :return pairs of matched data
   :rtype: list
   """
@@ -122,6 +143,10 @@ def KSanalyzer(src, cutoff=0.05):
           for source in sourcelst:
             source_name = source["name"]
             target_name = target["name"]
+            if len(option)>=2: # select some rows for KS test
+              pdb.set_trace()
+              source = selectRows(source,option)
+              target = selectRows(target, option)
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
               group=source_group, target_src=target_name)
             if X["score"] > cutoff:
