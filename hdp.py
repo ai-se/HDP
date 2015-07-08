@@ -119,7 +119,7 @@ def selectRows(old_data, option):
       else:
         raise ValueError("Should indicate an int number of intances")
     i += 2
-  if i == 2: return old_data
+  return old_data
 
 
 def KSanalyzer(src, option=[], cutoff=0.05):
@@ -143,11 +143,14 @@ def KSanalyzer(src, option=[], cutoff=0.05):
             source_name = source["name"]
             target_name = target["name"]
             if len(option) >= 2:  # select some rows for KS test
-              source = selectRows(source, option)
-              target = selectRows(target, option)
+              if "-S" in option and option[option.index("-S") + 1] == "S" :
+                source = selectInstances(source, option)
+              if "-T" in option and option[option.index("-T") + 1] == "S" :
+                target = selectInstances(target, option)
+              print("="*30)
               print(len(source.data[0]))
               print(len(target.data[0]))
-              pdb.set_trace()
+              # pdb.set_trace()
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
                                                                               group=source_group,
                                                                               target_src=target_name)
