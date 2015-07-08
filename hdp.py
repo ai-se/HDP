@@ -99,7 +99,8 @@ def attributeSelection(data):
       source_name = source["name"]
       A = loadWekaData(source_name)
       A_selected_index = featureSelection(A, int(int(A.classIndex()) * 0.15))
-      features_list = [str(attr).split(" ")[1] for i,attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
+      features_list = [str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
+                       for i,attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
       feature_dict[source_name] = features_list
   return feature_dict
 
