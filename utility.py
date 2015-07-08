@@ -3,14 +3,12 @@ from __future__ import print_function, division
 import jnius_config
 jnius_config.add_options('-Xrs', '-Xmx6096')
 jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
-                           '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar')
+                           '/Users/FuWei/Github/HDP/jar/weka.jar',
+                           '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar',
+                           '/Users/FuWei/Github/HDP/jar/commons-math3-3.5/commons-math3-3.5.jar'
+                           )
 import pdb
-jnius_config.add_options('-Xrs', '-Xmx4096')
-jnius_config.set_classpath('.', '/Users/FuWei/Github/HDP/jar/weka.jar',
-                           '/Users/FuWei/Github/HDP/jar/commons-math3-3.5/commons-math3-3.5.jar')
-
 import random
-import shutil
 import os
 from os import listdir
 from os.path import isfile, join
@@ -63,7 +61,8 @@ def read(src="./dataset"):
     path = join(src, f)
     for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
       arff = loadWekaData(val)
-      attributes = [str(i).split(" ")[1] for i in enumerateToList(arff.enumerateAttributes())]  # exclude the label
+      attributes = [str(i)[str(i).find("@attribute")+len("@attribute")+1:str(i).find("numeric")-1]
+                    for i in enumerateToList(arff.enumerateAttributes())]  # exclude the label
       columns = [arff.attributeToDoubleArray(i) for i in range(int(arff.classIndex()))]  # exclude the class label
       data[f] = data.get(f, []) + [o(name=val, attr=attributes, data=columns)]
   return data
@@ -188,6 +187,25 @@ def featureSelection(data, num_of_attributes):
   features = attsel.selectedAttributes()[:num_of_attributes]
   index = [i - 1 for i in features]  # for some reason, weka return index form 1-based not zero-based
   return index
+
+def selectInstances(old_data,option):
+  """
+  :param old_data: the data to be selected
+  :type old_data: o
+  :para option: parameters for filter
+  :type option: list
+  """
+  arff = loadWekaData(old_data.name) # re-read the data
+  numInstance = arff.numInstances()
+  while numInstance > option[option.index("-N")+1]:
+    random_index = random.randint(0,numInstance-1)
+    arff.remove(random_index)
+    numInstance -=1
+  attributes = [str(i)[str(i).find("@attribute")+len("@attribute")+1:str(i).find("numeric")-1]
+                for i in enumerateToList(arff.enumerateAttributes())]  # exclude the label
+  columns = [arff.attributeToDoubleArray(i) for i in range(int(arff.classIndex()))]  # exclude the class label
+  return o(name=old_data.name, attr=attributes, data=columns)
+
 
 def PCA(data_src="",ratio = 0.3):
   def createfolder(src):
