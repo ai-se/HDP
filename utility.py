@@ -208,13 +208,19 @@ def selectInstances(old_data,option):
   return o(name=old_data.name, attr=attributes, data=columns)
 
 
-def PCA(data_src="",ratio = 0.3):
+def PCA(data_src="",number_of_componets = 2):
   def createfolder(src):
     new_src = "./R"+src
     if os.path.exists(new_src):
       return
     else:
       os.makedirs(new_src) # generate new folders for each file
+  def deleteComponents(data):
+    for i in range(data.numAttributes()-2,0,-1): # delete attributes from the back, except of clasl label
+      if i >= number_of_componets:
+        data.deleteAttributeAt(i)
+    return data
+
 
   data = loadWekaData(data_src)
   search = autoclass('weka.attributeSelection.Ranker')()
@@ -225,6 +231,8 @@ def PCA(data_src="",ratio = 0.3):
   attsel.setEvaluator(evaluator)
   attsel.SelectAttributes(data)
   reduced_data = attsel.reduceDimensionality(data)
+  reduced_data = deleteComponents(reduced_data)
+  pdb.set_trace()
   createfolder(data_src[2:data_src.rfind("/")])
   saver = autoclass('weka.core.converters.ArffSaver')()
   saver.setInstances(reduced_data)
