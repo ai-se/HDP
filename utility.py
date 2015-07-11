@@ -112,6 +112,8 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
     del_attr = []
     for k, attr in enumerate(enumerateToList(data.enumerateAttributes())):
       temp= str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
+      if temp[0] == "'":
+        temp = temp[1:-1]
       if temp not in used_attr:
         del_attr += [k]
     return del_attr
@@ -121,7 +123,6 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
     for i in order[:]:  # delete from big index, except for the class attribute
       data.deleteAttributeAt(i)
     return data
-
   source_data = loadWekaData(source_src)
   target_data = loadWekaData(target_src)
   # cls = Classifier(classname="weka.classifiers.functions.Logistic")
