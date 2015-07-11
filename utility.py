@@ -110,6 +110,7 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
   def getIndex(data, used_attr):
     # pdb.set_trace()
     del_attr = []
+    used_attr = [ i[1:-1] if i[0]=="'" or i[0]=='"' else i for i in used_attr ]
     for k, attr in enumerate(enumerateToList(data.enumerateAttributes())):
       temp= str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
       if temp[0] == "'":
@@ -123,6 +124,9 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
     for i in order[:]:  # delete from big index, except for the class attribute
       data.deleteAttributeAt(i)
     return data
+  #
+  # if '-0.443dit...' in test_attr:
+  #   pdb.set_trace()
   source_data = loadWekaData(source_src)
   target_data = loadWekaData(target_src)
   # cls = Classifier(classname="weka.classifiers.functions.Logistic")
@@ -232,7 +236,6 @@ def PCA(data_src="",number_of_componets = 2):
   attsel.SelectAttributes(data)
   reduced_data = attsel.reduceDimensionality(data)
   reduced_data = deleteComponents(reduced_data)
-  pdb.set_trace()
   createfolder(data_src[2:data_src.rfind("/")])
   saver = autoclass('weka.core.converters.ArffSaver')()
   saver.setInstances(reduced_data)
