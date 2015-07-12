@@ -75,7 +75,9 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
-      result = test.kolmogorovSmirnovTest(val1, val2)
+      # result = test.kolmogorovSmirnovTest(val1, val2)
+      temp = stats.ks_2samp(val1, val2)
+      result = temp[1]
       if result > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou_feature, tar_feature)] = result
@@ -147,10 +149,10 @@ def KSanalyzer(src, option=[], cutoff=0.05):
                 source = selectInstances(source, option)
               if "-T" in option and option[option.index("-T") + 1] == "S" :
                 target = selectInstances(target, option)
-              print("="*30)
-              print(len(source.data[0]))
-              print(len(target.data[0]))
-              # pdb.set_trace()
+              # print("="*30)
+              # print(len(source.data[0]))
+              # print(len(target.data[0]))
+
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
                                                                               group=source_group,
                                                                               target_src=target_name)
