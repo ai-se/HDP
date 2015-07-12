@@ -153,6 +153,7 @@ def KSanalyzer(src, option=[], cutoff=0.05):
               # print(len(source.data[0]))
               # print(len(target.data[0]))
 
+
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
                                                                               group=source_group,
                                                                               target_src=target_name)
@@ -183,9 +184,11 @@ def call(source_src, target_src, source_attr, target_attr):
     return []
 
 
-def hdp(target_src, source_target_match):
+def hdp(use_samll_source, target_src, source_target_match):
   """
    source_target_match = KSanalyzer()
+  :param use_samll_source: flag to indicate whether to use small data set
+  :type use_samll_source: boolean
   :param target_src : src of test(target) data set
   :type target_src : str
   :param source_target_match : matched source and target data test
@@ -199,9 +202,11 @@ def hdp(target_src, source_target_match):
     if i.target_src == target_name:  # for all
       source_attr = i.attr_source
       target_attr = i.attr_target
-      source_src = i.source_src
-      result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=source_src))
-      result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=source_src))
+      match_source_src = i.source_src
+      if use_samll_source:
+        source_src = "./Small"+i.source_src[2:]
+      result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=match_source_src))
+      result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=match_source_src))
   return result
 
 
