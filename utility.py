@@ -166,6 +166,12 @@ def filter(data, toSave=False, file_name="test", filter_name="weka.filters.unsup
   # print(filtered)
   return filtered
 
+def save(data_instance,src):
+  saver = autoclass('weka.core.converters.ArffSaver')()
+  saver.setInstances(data_instance)
+  saver.setFile(autoclass("java.io.File")(src))
+  saver.writeBatch()
+
 
 def featureSelection(data, num_of_attributes):
   """
@@ -236,6 +242,37 @@ def runPCA():
     for one in srclst:
       PCA(one)
   return "./Rdataset"
+
+def createfolder(new_src):
+  if os.path.exists(new_src):
+    return
+  else:
+    os.makedirs(new_src) # generate new folders for each file
+
+def small(data_src,option):
+  """
+  :param data_src: src of data
+  :type data_src: str
+  :para option: parameters for filter
+  :type option: list
+  """
+  arff = loadWekaData(data_src) # re-read the data
+  numInstance = arff.numInstances()
+  while numInstance > option[option.index("-N")+1]:
+    random_index = random.randint(0,numInstance-1)
+    arff.remove(random_index)
+    numInstance -=1
+    createfolder("./Small"+data_src[2:data_src.rfind("/")])
+  save(arff,"./Small"+data_src[2:])
+
+
+def runSmall(option = ["-N","200"]):
+  datasrc = readsrc()
+  for group, srclst in datasrc.iteritems():
+    for one in srclst:
+      small(one, option)
+  return "./Smalldataset"
+
 
 if __name__ == "__main__":
   # read()
