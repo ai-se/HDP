@@ -83,7 +83,6 @@ def run(src="./dataset"):
       process(source_target_match, one, out_hdp)
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
-
 if __name__ == "__main__":
   # readMatch()
   run()
