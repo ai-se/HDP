@@ -1,10 +1,7 @@
 # __author__ = 'WeiFu'
 from __future__ import division, print_function
-from utility import *
-from wpdp import *
-from cpdp import *
-from hdp import *
 import time
+from hdp import *
 
 
 def readMatch(src="./result/source_target_match.txt"):
@@ -29,7 +26,13 @@ def readMatch(src="./result/source_target_match.txt"):
              target_src=target_src)
     result.append(temp)
   return result
-  # pdb.set_trace()
+
+
+def getMedian(lst):
+  if len(lst) % 2:
+    return lst[int(len(lst) * 0.5)]
+  else:
+    return (lst[int(len(lst) * 0.5 - 0.5)] + lst[int(len(lst) * 0.5 + 0.5)]) / 2
 
 
 def process(match, target_src, result):
@@ -42,26 +45,25 @@ def process(match, target_src, result):
       # together.
     if not one_source_result:
       continue
-    ordered = sorted(one_source_result)
-    one_median = ordered[int(len(ordered) * 0.5)]
+    one_median = getMedian(sorted(one_source_result))
     print(i.source_src, "===>", target_src, one_median)
     total += [one_median]
   if len(total) == 0:
     print("no results for ", target_src)
     return
-  total_median = sorted(total)[int(len(total) * 0.5)]
+  total_median = getMedian(sorted(total))
   print("final ====>", target_src, total_median)
   return total_median
 
 
-def run(original_src="./dataset",option = ["-S","S","-T","S","-N",200]):
+def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-N", 200]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   # src = runPCA()
   small_src = runSmall(option)
-  use_small_source = True
+  use_small_source = False
   datasrc = readsrc(original_src)
-  # source_target_match = KSanalyzer(src,[]) # run JC's experiment
-  source_target_match = KSanalyzer(original_src, option) # to do online test ,you need to uncomment
+  source_target_match = KSanalyzer(original_src, [])  # run JC's experiment
+  # source_target_match = KSanalyzer(original_src, option) # to do online test ,you need to uncomment
   # source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
     for target_src in srclst:
@@ -76,13 +78,14 @@ def run(original_src="./dataset",option = ["-S","S","-T","S","-N",200]):
                       ["-N", "2", "-F", "2", "-S", "1"])
         # out_wpdp += wpdp(tarin, test)
         # cpdp(group,one)
-        temp = hdp(use_small_source,target_src, source_target_match)
+        temp = hdp(use_small_source, target_src, source_target_match)
         if len(temp) == 0:
           continue
         else:
           out_hdp += temp
       process(source_target_match, target_src, out_hdp)
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
+
 
 if __name__ == "__main__":
   # readMatch()
