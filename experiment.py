@@ -4,6 +4,7 @@ from utility import *
 from wpdp import *
 from cpdp import *
 from hdp import *
+import time
 
 
 def readMatch(src="./result/source_target_match.txt"):
@@ -54,6 +55,7 @@ def process(match, target_src, result):
 
 
 def run(src="./dataset"):
+  print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   # src = runPCA()
   datasrc = readsrc(src)
   # source_target_match = KSanalyzer(src,[])
@@ -79,6 +81,7 @@ def run(src="./dataset"):
         else:
           out_hdp += temp
       process(source_target_match, one, out_hdp)
+      print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
 
 if __name__ == "__main__":
