@@ -54,20 +54,21 @@ def process(match, target_src, result):
   return total_median
 
 
-def run(src="./dataset"):
+def run(original_src="./dataset",option = ["-S","S","-T","S","-N",200]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   # src = runPCA()
-  datasrc = readsrc(src)
-  # source_target_match = KSanalyzer(src,[])
-  source_target_match = KSanalyzer(src, ["-S","S","-T","S","-N",200]) # to do online test ,you need to uncomment
-  pdb.set_trace()
+  small_src = runSmall(option)
+  use_small_source = True
+  datasrc = readsrc(original_src)
+  # source_target_match = KSanalyzer(src,[]) # run JC's experiment
+  source_target_match = KSanalyzer(original_src, option) # to do online test ,you need to uncomment
   # source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
-    for one in srclst:
+    for target_src in srclst:
       random.seed(1)
-      data = loadWekaData(one)
+      data = loadWekaData(target_src)
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
-      for _ in xrange(500):
+      for _ in xrange(10):
         randomized = filter(data, False, "", "weka.filters.unsupervised.instance.Randomize", ["-S", str(_)])
         train = filter(randomized, True, "train", "weka.filters.unsupervised.instance.RemoveFolds",
                        ["-N", "2", "-F", "1", "-S", "1"])
@@ -75,12 +76,12 @@ def run(src="./dataset"):
                       ["-N", "2", "-F", "2", "-S", "1"])
         # out_wpdp += wpdp(tarin, test)
         # cpdp(group,one)
-        temp = hdp(one, source_target_match)
+        temp = hdp(use_small_source,target_src, source_target_match)
         if len(temp) == 0:
           continue
         else:
           out_hdp += temp
-      process(source_target_match, one, out_hdp)
+      process(source_target_match, target_src, out_hdp)
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
 if __name__ == "__main__":
