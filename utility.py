@@ -1,7 +1,7 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import jnius_config
-jnius_config.add_options('-Xrs', '-Xmx6096')
+jnius_config.add_options('-Xmx4096')
 jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
                            '/Users/FuWei/Github/HDP/jar/weka.jar',
                            '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar',
