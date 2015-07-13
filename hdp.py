@@ -204,7 +204,9 @@ def hdp(use_samll_source, target_src, source_target_match):
       target_attr = i.attr_target
       match_source_src = i.source_src
       if use_samll_source:
-        source_src = "./Small"+i.source_src[2:]
+        source_src = "./Small"+i.source_src[2:] # here use small data set to test
+      else:
+        source_src = match_source_src
       result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=match_source_src))
       result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=match_source_src))
   return result
