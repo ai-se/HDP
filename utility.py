@@ -34,6 +34,12 @@ class o:
     show = [":%s %s" % (k, i.__dict__[k]) for k in keys]
     return '{' + ' '.join(show) + '}'
 
+def printm(matrix):
+  s = [[str(e) for e in row] for row in matrix]
+  lens = [max(map(len, col)) for col in zip(*s)]
+  fmt = ' | '.join('{{:{}}}'.format(x) for x in lens)
+  for row in [fmt.format(*row) for row in s]:
+    print(row)
 
 def enumerateToList(enum):
   result = []
