@@ -1,10 +1,8 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
-import random, math
+import math
 from utility import *
-# import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest as KS
-# from bipartite import maxWeightMatching
-# from scipy import stats
+from scipy import stats
 import numpy as np
 import networkx as nx
 
@@ -77,9 +75,9 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
-      result = test.kolmogorovSmirnovTest(val1,val2)
-      print(result)
-      # result = mytest.kolmogorovSmirnovTest(val1,val2)
+      # result = test.kolmogorovSmirnovTest(val1, val2)
+      temp = stats.ks_2samp(val1, val2)
+      result = temp[1]
       if result > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou_feature, tar_feature)] = result
@@ -99,12 +97,13 @@ def attributeSelection(data):
       source_name = source["name"]
       A = loadWekaData(source_name)
       A_selected_index = featureSelection(A, int(int(A.classIndex()) * 0.15))
-      features_list = [str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
-                       for i,attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
+      features_list = [str(attr)[str(attr).find("@attribute") + len("@attribute") + 1:str(attr).find("numeric") - 1]
+                       for i, attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
       feature_dict[source_name] = features_list
   return feature_dict
 
-def selectRows(data,option):
+
+def selectRows(old_data, option):
   """
   to do supervised or unsupervised instance selection
   :param data: the original data
@@ -113,18 +112,19 @@ def selectRows(data,option):
   :type option: list
 
   """
+  if len(option) == 0: return old_data
   i = 0
-  while option[i]:
-    pdb.set_trace()
-    if option[i] == "-S" and option[i+1] == "S":
+  while i<=4:
+    if (option[i] == "-S" and option[i + 1] == "S") or (option[i] == "-T" and option[i + 1] == "S"):
+      if isinstance(option[option.index("-N") + 1], int):
+        return selectInstances(old_data, option)
+      else:
+        raise ValueError("Should indicate an int number of intances")
+    i += 2
+  return old_data
 
 
-
-
-
-
-
-def KSanalyzer(src, option, cutoff=0.05):
+def KSanalyzer(src, option=[], cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
   :param src : src of KS test data
@@ -144,12 +144,19 @@ def KSanalyzer(src, option, cutoff=0.05):
           for source in sourcelst:
             source_name = source["name"]
             target_name = target["name"]
-            if len(option)>=2: # select some rows for KS test
-              pdb.set_trace()
-              source = selectRows(source,option)
-              target = selectRows(target, option)
+            if len(option) >= 2:  # select some rows for KS test
+              if "-S" in option and option[option.index("-S") + 1] == "S" :
+                source = selectInstances(source, option)
+              if "-T" in option and option[option.index("-T") + 1] == "S" :
+                target = selectInstances(target, option)
+              # print("="*30)
+              # print(len(source.data[0]))
+              # print(len(target.data[0]))
+
+
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
-              group=source_group, target_src=target_name)
+                                                                              group=source_group,
+                                                                              target_src=target_name)
             if X["score"] > cutoff:
               best_pairs.append(X)
   # pdb.set_trace()
@@ -177,9 +184,11 @@ def call(source_src, target_src, source_attr, target_attr):
     return []
 
 
-def hdp(target_src, source_target_match):
+def hdp(use_samll_source, target_src, source_target_match):
   """
    source_target_match = KSanalyzer()
+  :param use_samll_source: flag to indicate whether to use small data set
+  :type use_samll_source: boolean
   :param target_src : src of test(target) data set
   :type target_src : str
   :param source_target_match : matched source and target data test
@@ -193,9 +202,13 @@ def hdp(target_src, source_target_match):
     if i.target_src == target_name:  # for all
       source_attr = i.attr_source
       target_attr = i.attr_target
-      source_src = i.source_src
-      result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=source_src))
-      result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=source_src))
+      match_source_src = i.source_src
+      if use_samll_source:
+        source_src = "./Small"+i.source_src[2:] # here use small data set to test
+      else:
+        source_src = match_source_src
+      result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=match_source_src))
+      result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=match_source_src))
   return result
 
 
@@ -237,6 +250,3 @@ if __name__ == "__main__":
   # cpdp()
   # readarff()
   testEQ()
-
-
-

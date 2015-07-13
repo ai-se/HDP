@@ -1,8 +1,6 @@
 # __author__ = 'WeiFu'
 from __future__ import division, print_function
-from utility import *
-from wpdp import *
-from cpdp import *
+import time
 from hdp import *
 
 
@@ -28,7 +26,13 @@ def readMatch(src="./result/source_target_match.txt"):
              target_src=target_src)
     result.append(temp)
   return result
-  # pdb.set_trace()
+
+
+def getMedian(lst):
+  if len(lst) % 2:
+    return round(lst[int(len(lst) * 0.5)],3)
+  else:
+    return round((lst[int(len(lst) * 0.5 - 0.5)] + lst[int(len(lst) * 0.5 + 0.5)]) / 2,3)
 
 
 def process(match, target_src, result):
@@ -41,31 +45,25 @@ def process(match, target_src, result):
       # together.
     if not one_source_result:
       continue
-    ordered = sorted(one_source_result)
-    one_median = ordered[int(len(ordered) * 0.5)]
-    print(i.source_src, "===>", target_src, one_median)
+    one_median = getMedian(sorted(one_source_result))
+    # print(i.source_src, "===>", target_src, one_median)
     total += [one_median]
   if len(total) == 0:
     print("no results for ", target_src)
     return
-  total_median = sorted(total)[int(len(total) * 0.5)]
+  total_median = getMedian(sorted(total))
   print("final ====>", target_src, total_median)
   return total_median
 
 
-def run(src="./dataset"):
-  # src = runPCA()
-  datasrc = readsrc(src)
-  source_target_match = KSanalyzer(src,[])
-  # source_target_match = KSanalyzer(src, ["-S","L","-T","L","-N",200]) # to do online test ,you need to uncomment
-  pdb.set_trace()
-  # source_target_match = readMatch()
+def run1(source_target_match, datasrc, use_small_source):
+  out = {}
   for group, srclst in datasrc.iteritems():
-    for one in srclst:
+    for target_src in srclst:
       random.seed(1)
-      data = loadWekaData(one)
+      data = loadWekaData(target_src)
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
-      for _ in xrange(500):
+      for _ in xrange(10):
         randomized = filter(data, False, "", "weka.filters.unsupervised.instance.Randomize", ["-S", str(_)])
         train = filter(randomized, True, "train", "weka.filters.unsupervised.instance.RemoveFolds",
                        ["-N", "2", "-F", "1", "-S", "1"])
@@ -73,12 +71,69 @@ def run(src="./dataset"):
                       ["-N", "2", "-F", "2", "-S", "1"])
         # out_wpdp += wpdp(tarin, test)
         # cpdp(group,one)
-        temp = hdp(one, source_target_match)
+        temp = hdp(use_small_source, target_src, source_target_match)
         if len(temp) == 0:
           continue
         else:
           out_hdp += temp
-      process(source_target_match, one, out_hdp)
+      dataset = target_src[target_src.rindex("/")+1:-5]
+      result = process(source_target_match, target_src, out_hdp)
+      out[dataset] = out.get(dataset,[])+ [result]
+      print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
+  # printout(out)
+  return out
+
+def printout(result_dict):
+  out = [result_dict["method"]]
+  for key,val in result_dict.iteritems():
+    if key== "method":
+      continue
+    out.append(val)
+  printm(out)
+
+def repeat(KSanalyzer,original_src,option, datasrc, use_small_source):
+  result,temp={},{}
+  for _ in xrange(20):
+    if use_small_source:
+      small_src = runSmall(option)
+    source_target_match = KSanalyzer(original_src,option)
+    out = run1(source_target_match, datasrc, use_small_source)
+    for key, val in out.iteritems():
+      temp[key] = temp.get(key,[])+ val
+  for key, val in temp.iteritems():
+    result[key]=[getMedian(sorted(val))]
+  return result
+
+def addResult(out,method,new):
+  out["method"] = out.get("method")+[method]
+  for key, val in out.iteritems():
+    if key == "method":
+      continue
+    out[key] = out.get(key)+new[key]
+  return out
+
+
+def run(original_src="./dataset",option=["-S", "S", "-T", "S", "-N", 200]):
+  print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
+  out = {"EQ":['EQ',0.783],"JDT":['JDT',0.767],"LC":['LC',0.655],"ML":['ML',0.692],"PDE":['PDE', 0.717],
+        "apache":['apache',0.717],"safe":['safe',0.818],"zxing":['zxing',0.650],"ant-1.3":['ant-1.3', 0.835],
+        "arc":['arc', 0.701],"camel-1.0":['camel-1.0', 0.639],"poi-1.5":['poi-1.5',0.701],"redaktor":['redaktor',0.537],
+        "skarbonka":['skarbonka', 0.694],"tomcat":['tomcat', 0.818],"velocity-1.4":['velocity-1.4',0.391],
+        "xalan-2.4":['xalan-2.4',0.751], "xerces-1.2":['xerces-1.2',0.489],"cm1":['cm1', 0.717],"mw1":['mw1',0.727],
+        "PC1":['pc1', 0.752],"PC3":['pc3',0.738], "PC4":['pc4', 0.682],"ar1":['ar1', 0.734],"ar3":['ar3', 0.823],
+        "ar4":['ar4', 0.816],"ar5":['ar5', 0.911],"ar6":['ar6',0.640],"method":['Target','HDP-JC']}
+  # src = runPCA()
+  datasrc = readsrc(original_src)
+  source_target_match = KSanalyzer(original_src, [])  # run JC's experiment
+  out = addResult(out,'HDP-Scipy',repeat(KSanalyzer, original_src,[],datasrc, False))
+  out = addResult(out,'N-200',repeat(KSanalyzer, original_src,option,datasrc, True))
+  printout(out)
+  print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
+
+
+  # # repeat(source_target_match, datasrc, False)
+  # source_target_match = KSanalyzer(original_src, option) # reduced_instance
+  # repeat(source_target_match, datasrc, True)
 
 
 if __name__ == "__main__":
