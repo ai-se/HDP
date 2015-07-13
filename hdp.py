@@ -4,7 +4,7 @@ import random, math
 from utility import *
 # import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest as KS
 # from bipartite import maxWeightMatching
-# from scipy import stats
+from scipy import stats
 import numpy as np
 import networkx as nx
 
@@ -78,8 +78,9 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
       result = test.kolmogorovSmirnovTest(val1,val2)
-      print(result)
-      # result = mytest.kolmogorovSmirnovTest(val1,val2)
+      # temp = stats.ks_2samp(val1,val2)
+      # print(temp[1])
+      # result = temp[1]
       if result > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou_feature, tar_feature)] = result
@@ -104,22 +105,22 @@ def attributeSelection(data):
       feature_dict[source_name] = features_list
   return feature_dict
 
-def selectRows(data,option):
-  """
-  to do supervised or unsupervised instance selection
-  :param data: the original data
-  :type data : o
-  :param option: options to indicate kind of instance selection
-  :type option: list
-
-  """
-  i = 0
-  while option[i]:
-    pdb.set_trace()
-    if option[i] == "-S" and option[i+1] == "S":
-
-
-
+# def selectRows(data,option):
+#   """
+#   to do supervised or unsupervised instance selection
+#   :param data: the original data
+#   :type data : o
+#   :param option: options to indicate kind of instance selection
+#   :type option: list
+#
+#   """
+#   i = 0
+#   while option[i]:
+#     pdb.set_trace()
+#     if option[i] == "-S" and option[i+1] == "S":
+#
+#
+#
 
 
 
@@ -144,10 +145,10 @@ def KSanalyzer(src, option, cutoff=0.05):
           for source in sourcelst:
             source_name = source["name"]
             target_name = target["name"]
-            if len(option)>=2: # select some rows for KS test
-              pdb.set_trace()
-              source = selectRows(source,option)
-              target = selectRows(target, option)
+            # if len(option)>=2: # select some rows for KS test
+            #   pdb.set_trace()
+            #   source = selectRows(source,option)
+            #   target = selectRows(target, option)
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
               group=source_group, target_src=target_name)
             if X["score"] > cutoff:

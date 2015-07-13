@@ -4,9 +4,10 @@ from utility import *
 from wpdp import *
 from cpdp import *
 from hdp import *
+import time
 
 
-def readMatch(src="./result/source_target_match.txt"):
+def readMatch(src="./result/PCA_source_target_match0710.txt"):
   def getStrip(lst):
     result = []
     for one in lst:
@@ -30,6 +31,11 @@ def readMatch(src="./result/source_target_match.txt"):
   return result
   # pdb.set_trace()
 
+def getMedian(lst):
+  if len(lst) % 2:
+    return round(lst[int(len(lst) * 0.5)],3)
+  else:
+    return round((lst[int(len(lst) * 0.5 - 0.5)] + lst[int(len(lst) * 0.5 + 0.5)]) / 2,3)
 
 def process(match, target_src, result):
   total = []
@@ -41,24 +47,24 @@ def process(match, target_src, result):
       # together.
     if not one_source_result:
       continue
-    ordered = sorted(one_source_result)
-    one_median = ordered[int(len(ordered) * 0.5)]
+    one_median = getMedian(sorted(one_source_result))
     print(i.source_src, "===>", target_src, one_median)
     total += [one_median]
   if len(total) == 0:
     print("no results for ", target_src)
     return
-  total_median = sorted(total)[int(len(total) * 0.5)]
+  total_median = getMedian(sorted(total))
   print("final ====>", target_src, total_median)
   return total_median
 
 
 def run(src="./dataset"):
-  # src = runPCA()
+  print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
+  src = runPCA()
   datasrc = readsrc(src)
   source_target_match = KSanalyzer(src,[])
   # source_target_match = KSanalyzer(src, ["-S","L","-T","L","-N",200]) # to do online test ,you need to uncomment
-  pdb.set_trace()
+  # pdb.set_trace()
   # source_target_match = readMatch()
   for group, srclst in datasrc.iteritems():
     for one in srclst:
@@ -79,6 +85,7 @@ def run(src="./dataset"):
         else:
           out_hdp += temp
       process(source_target_match, one, out_hdp)
+      print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
 
 if __name__ == "__main__":
