@@ -30,9 +30,9 @@ def readMatch(src="./result/source_target_match.txt"):
 
 def getMedian(lst):
   if len(lst) % 2:
-    return round(lst[int(len(lst) * 0.5)],3)
+    return round(lst[int(len(lst) * 0.5)], 3)
   else:
-    return round((lst[int(len(lst) * 0.5 - 0.5)] + lst[int(len(lst) * 0.5 + 0.5)]) / 2,3)
+    return round((lst[int(len(lst) * 0.5 - 0.5)] + lst[int(len(lst) * 0.5 + 0.5)]) / 2, 3)
 
 
 def process(match, target_src, result):
@@ -76,57 +76,64 @@ def run1(source_target_match, datasrc, use_small_source):
           continue
         else:
           out_hdp += temp
-      dataset = target_src[target_src.rindex("/")+1:-5]
+      dataset = target_src[target_src.rindex("/") + 1:-5]
       result = process(source_target_match, target_src, out_hdp)
-      out[dataset] = out.get(dataset,[])+ [result]
+      out[dataset] = out.get(dataset, []) + [result]
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   # printout(out)
   return out
 
+
 def printout(result_dict):
   out = [result_dict["method"]]
-  for key,val in result_dict.iteritems():
-    if key== "method":
+  for key, val in result_dict.iteritems():
+    if key == "method":
       continue
     out.append(val)
   printm(out)
 
-def repeat(KSanalyzer,original_src,option, datasrc, use_small_source):
-  result,temp={},{}
-  for _ in xrange(20):
+
+def repeat(KSanalyzer, original_src, option, datasrc, use_small_source):
+  result, temp = {}, {}
+  for _ in xrange(5):
     if use_small_source:
       small_src = runSmall(option)
-    source_target_match = KSanalyzer(original_src,option)
+    source_target_match = KSanalyzer(original_src, option)
     out = run1(source_target_match, datasrc, use_small_source)
     for key, val in out.iteritems():
-      temp[key] = temp.get(key,[])+ val
+      temp[key] = temp.get(key, []) + val
   for key, val in temp.iteritems():
-    result[key]=[getMedian(sorted(val))]
+    result[key] = [getMedian(sorted(val))]
   return result
 
-def addResult(out,method,new):
-  out["method"] = out.get("method")+[method]
+
+def addResult(out, method, new):
+  out["method"] = out.get("method") + [method]
   for key, val in out.iteritems():
     if key == "method":
       continue
-    out[key] = out.get(key)+new[key]
+    out[key] = out.get(key) + new[key]
   return out
 
 
-def run(original_src="./dataset",option=["-S", "S", "-T", "S", "-N", 200]):
+def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-N", 200]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
-  out = {"EQ":['EQ',0.783],"JDT":['JDT',0.767],"LC":['LC',0.655],"ML":['ML',0.692],"PDE":['PDE', 0.717],
-        "apache":['apache',0.717],"safe":['safe',0.818],"zxing":['zxing',0.650],"ant-1.3":['ant-1.3', 0.835],
-        "arc":['arc', 0.701],"camel-1.0":['camel-1.0', 0.639],"poi-1.5":['poi-1.5',0.701],"redaktor":['redaktor',0.537],
-        "skarbonka":['skarbonka', 0.694],"tomcat":['tomcat', 0.818],"velocity-1.4":['velocity-1.4',0.391],
-        "xalan-2.4":['xalan-2.4',0.751], "xerces-1.2":['xerces-1.2',0.489],"cm1":['cm1', 0.717],"mw1":['mw1',0.727],
-        "PC1":['pc1', 0.752],"PC3":['pc3',0.738], "PC4":['pc4', 0.682],"ar1":['ar1', 0.734],"ar3":['ar3', 0.823],
-        "ar4":['ar4', 0.816],"ar5":['ar5', 0.911],"ar6":['ar6',0.640],"method":['Target','HDP-JC']}
+  out = {"EQ": ['EQ', 0.783], "JDT": ['JDT', 0.767], "LC": ['LC', 0.655], "ML": ['ML', 0.692], "PDE": ['PDE', 0.717],
+         "apache": ['apache', 0.717], "safe": ['safe', 0.818], "zxing": ['zxing', 0.650], "ant-1.3": ['ant-1.3', 0.835],
+         "arc": ['arc', 0.701], "camel-1.0": ['camel-1.0', 0.639], "poi-1.5": ['poi-1.5', 0.701],
+         "redaktor": ['redaktor', 0.537], "skarbonka": ['skarbonka', 0.694], "tomcat": ['tomcat', 0.818],
+         "velocity-1.4": ['velocity-1.4', 0.391], "xalan-2.4": ['xalan-2.4', 0.751],
+         "xerces-1.2": ['xerces-1.2', 0.489], "cm1": ['cm1', 0.717], "mw1": ['mw1', 0.727], "PC1": ['pc1', 0.752],
+         "PC3": ['pc3', 0.738], "PC4": ['pc4', 0.682], "ar1": ['ar1', 0.734], "ar3": ['ar3', 0.823],
+         "ar4": ['ar4', 0.816], "ar5": ['ar5', 0.911], "ar6": ['ar6', 0.640], "method": ['Target', 'HDP-JC']}
   # src = runPCA()
   datasrc = readsrc(original_src)
   source_target_match = KSanalyzer(original_src, [])  # run JC's experiment
-  out = addResult(out,'HDP-Scipy',repeat(KSanalyzer, original_src,[],datasrc, False))
-  out = addResult(out,'N-200',repeat(KSanalyzer, original_src,option,datasrc, True))
+  out = addResult(out, 'HDP-Scipy', repeat(KSanalyzer, original_src, [], datasrc, False))
+  for num in range(50, 250, 50):
+    title = 'N-' + str(num)
+    option[-1] = num
+    out = addResult(out, title, repeat(KSanalyzer, original_src, option, datasrc, True))
   printout(out)
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
