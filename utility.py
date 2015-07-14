@@ -1,7 +1,7 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import jnius_config
-jnius_config.add_options('-Xmx4096')
+jnius_config.add_options('-Xmx4096m')
 jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
                            '/Users/FuWei/Github/HDP/jar/weka.jar',
                            '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar',
@@ -220,6 +220,8 @@ def PCA(data_src="",number_of_componets = 2):
     else:
       os.makedirs(new_src) # generate new folders for each file
   def deleteComponents(data):
+    if number_of_componets < 1: # -1 means select all, no deletes
+      return data
     for i in range(data.numAttributes()-2,0,-1): # delete attributes from the back, except of clasl label
       if i >= number_of_componets:
         data.deleteAttributeAt(i)
@@ -242,11 +244,11 @@ def PCA(data_src="",number_of_componets = 2):
   saver.setFile(autoclass("java.io.File")("./R" + data_src[2:]))
   saver.writeBatch()
 
-def runPCA():
+def runPCA(num):
   datasrc = readsrc()
   for group, srclst in datasrc.iteritems():
     for one in srclst:
-      PCA(one)
+      PCA(one,num)
   return "./Rdataset"
 
 if __name__ == "__main__":
