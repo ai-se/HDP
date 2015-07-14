@@ -60,7 +60,7 @@ def process(match, target_src, result):
 
 def run(src="./dataset"):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
-  src = runPCA()
+  src = runPCA(2)
   datasrc = readsrc(src)
   source_target_match = KSanalyzer(src,[])
   # source_target_match = KSanalyzer(src, ["-S","L","-T","L","-N",200]) # to do online test ,you need to uncomment
@@ -71,7 +71,7 @@ def run(src="./dataset"):
       random.seed(1)
       data = loadWekaData(one)
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
-      for _ in xrange(500):
+      for _ in xrange(10):
         randomized = filter(data, False, "", "weka.filters.unsupervised.instance.Randomize", ["-S", str(_)])
         train = filter(randomized, True, "train", "weka.filters.unsupervised.instance.RemoveFolds",
                        ["-N", "2", "-F", "1", "-S", "1"])
