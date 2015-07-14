@@ -77,10 +77,10 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
-      result = test.kolmogorovSmirnovTest(val1,val2)
-      # temp = stats.ks_2samp(val1,val2)
+      # result = test.kolmogorovSmirnovTest(val1,val2)
+      temp = stats.ks_2samp(val1,val2)
       # print(temp[1])
-      # result = temp[1]
+      result = temp[1]
       if result > cutoff:
         # match[sou] = match.get(sou,[])+[(tar,result[1])]
         match[(sou_feature, tar_feature)] = result
@@ -93,13 +93,13 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   return maximumWeighted(match, target_lst, source_lst)
 
 
-def attributeSelection(data):
+def attributeSelection(data,select_ratio):
   feature_dict = {}
   for key, lst in data.iteritems():
     for source in lst:
       source_name = source["name"]
       A = loadWekaData(source_name)
-      A_selected_index = featureSelection(A, int(int(A.classIndex()) * 0.15))
+      A_selected_index = featureSelection(A, int(int(A.classIndex()) * select_ratio))
       features_list = [str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
                        for i,attr in enumerate(enumerateToList(A.enumerateAttributes())) if i in A_selected_index]
       feature_dict[source_name] = features_list
@@ -137,7 +137,10 @@ def KSanalyzer(src, option, cutoff=0.05):
   """
   data = read(src)
   best_pairs = []
-  selected_features = attributeSelection(data)
+  select_ratio = 0.15
+  if len(option) == 0 and "Rdataset" in src:
+    select_ratio = 1
+  selected_features = attributeSelection(data,select_ratio)
   for target_group, targetlst in data.iteritems():
     for target in targetlst:
       for source_group, sourcelst in data.iteritems():
