@@ -178,11 +178,11 @@ def call(source_src, target_src, source_attr, target_attr):
     return []
 
 
-def hdp(use_samll_source, target_src, source_target_match):
+def hdp(option, target_src, source_target_match):
   """
    source_target_match = KSanalyzer()
-  :param use_samll_source: flag to indicate whether to use small data set
-  :type use_samll_source: boolean
+  :param option : options for small or large datasets
+  :type option : list
   :param target_src : src of test(target) data set
   :type target_src : str
   :param source_target_match : matched source and target data test
@@ -197,7 +197,7 @@ def hdp(use_samll_source, target_src, source_target_match):
       source_attr = i.attr_source
       target_attr = i.attr_target
       match_source_src = i.source_src
-      if use_samll_source:
+      if option and option[option.index("-S")+1] == "S":
         source_src = "./Small"+i.source_src[2:] # here use small data set to test
       else:
         source_src = match_source_src

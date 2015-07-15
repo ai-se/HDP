@@ -40,8 +40,7 @@ def process(match, target_src, result):
   for i in match:
     one_source_result = None
     if i.target_src == target_src:
-      one_source_result = [j.result[0] for j in result if
-                           j.source_src == i.source_src and j.result != []]
+      one_source_result = [j.result[0] for j in result if j.source_src == i.source_src and j.result != []]
       # put all the results from one source
       # together.
     if not one_source_result:
@@ -57,8 +56,10 @@ def process(match, target_src, result):
   return total_median
 
 
-def run1(source_target_match, datasrc, use_small_source):
+def run1(source_target_match, option):
   out = {}
+  original_src = "./dataset"
+  datasrc = readsrc(original_src)
   for group, srclst in datasrc.iteritems():
     for target_src in srclst:
       data = loadWekaData(target_src)
@@ -71,12 +72,12 @@ def run1(source_target_match, datasrc, use_small_source):
                       ["-N", "2", "-F", "2", "-S", "1"])
         # out_wpdp += wpdp(tarin, test)
         # cpdp(group,one)
-        temp = hdp(use_small_source, target_src, source_target_match)
+        temp = hdp(option, target_src, source_target_match)
         if len(temp) == 0:
           continue
         else:
           out_hdp += temp
-      dataset = target_src[target_src.rindex("/") + 1:-5] # get name of datset
+      dataset = target_src[target_src.rindex("/") + 1:-5]  # get name of datset
       result = process(source_target_match, target_src, out_hdp)
       out[dataset] = out.get(dataset, []) + [result]
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
@@ -92,13 +93,13 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option, datasrc, use_small_source):
+def repeat(KSanalyzer, original_src, option):
   result, temp = {}, {}
   for _ in xrange(5):
-    if use_small_source:
-      small_src = runSmall(option)
+    if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
+      small_src = runSmall(option)  # generate small data sets
     source_target_match = KSanalyzer(original_src, option)
-    out = run1(source_target_match, datasrc, use_small_source)
+    out = run1(source_target_match, option)
     for key, val in out.iteritems():
       temp[key] = temp.get(key, []) + val
   for key, val in temp.iteritems():
@@ -115,7 +116,7 @@ def addResult(out, method, new):
   return out
 
 
-def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-N", 200]):
+def run(original_src="./dataset", option=["-S", "L", "-T", "S", "-N", 200]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   out = {"EQ": ['EQ', 0.783], "JDT": ['JDT', 0.767], "LC": ['LC', 0.655], "ML": ['ML', 0.692], "PDE": ['PDE', 0.717],
          "apache": ['apache', 0.717], "safe": ['safe', 0.818], "zxing": ['zxing', 0.650], "ant-1.3": ['ant-1.3', 0.835],
@@ -126,15 +127,12 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-N", 200]):
          "PC3": ['pc3', 0.738], "PC4": ['pc4', 0.682], "ar1": ['ar1', 0.734], "ar3": ['ar3', 0.823],
          "ar4": ['ar4', 0.816], "ar5": ['ar5', 0.911], "ar6": ['ar6', 0.640], "method": ['Target', 'HDP-JC']}
   # original_src = runPCA()
-  datasrc = readsrc(original_src)
-  # source_target_match = KSanalyzer(original_src, [])  # run JC's experiment
-  out = addResult(out, 'HDP-Scipy', repeat(KSanalyzer, original_src, [], datasrc, False))
+  out = addResult(out, 'HDP-Scipy', repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = 'N-' + str(num)
     option[-1] = num
-    out = addResult(out, title, repeat(KSanalyzer, original_src, option, datasrc, True))
+    out = addResult(out, title, repeat(KSanalyzer, original_src, option))
   printout(out)
-  print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
 
 if __name__ == "__main__":
