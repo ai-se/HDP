@@ -41,7 +41,8 @@ def process(match, target_src, result):
     one_source_result = None
     if i.target_src == target_src:
       one_source_result = [j.result[0] for j in result if
-                           j.source_src == i.source_src and j.result != []]  # put all the results from one source
+                           j.source_src == i.source_src and j.result != []]
+      # put all the results from one source
       # together.
     if not one_source_result:
       continue
@@ -60,7 +61,6 @@ def run1(source_target_match, datasrc, use_small_source):
   out = {}
   for group, srclst in datasrc.iteritems():
     for target_src in srclst:
-      random.seed(1)
       data = loadWekaData(target_src)
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
       for _ in xrange(10):
@@ -76,11 +76,10 @@ def run1(source_target_match, datasrc, use_small_source):
           continue
         else:
           out_hdp += temp
-      dataset = target_src[target_src.rindex("/") + 1:-5]
+      dataset = target_src[target_src.rindex("/") + 1:-5] # get name of datset
       result = process(source_target_match, target_src, out_hdp)
       out[dataset] = out.get(dataset, []) + [result]
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
-  # printout(out)
   return out
 
 
@@ -128,7 +127,7 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-N", 200]):
          "ar4": ['ar4', 0.816], "ar5": ['ar5', 0.911], "ar6": ['ar6', 0.640], "method": ['Target', 'HDP-JC']}
   # original_src = runPCA()
   datasrc = readsrc(original_src)
-  source_target_match = KSanalyzer(original_src, [])  # run JC's experiment
+  # source_target_match = KSanalyzer(original_src, [])  # run JC's experiment
   out = addResult(out, 'HDP-Scipy', repeat(KSanalyzer, original_src, [], datasrc, False))
   for num in range(50, 250, 50):
     title = 'N-' + str(num)
@@ -138,26 +137,8 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-N", 200]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
 
 
-  # # repeat(source_target_match, datasrc, False)
-  # source_target_match = KSanalyzer(original_src, option) # reduced_instance
-  # repeat(source_target_match, datasrc, True)
-
-
-def printPCA():
-  out = {"EQ": ['EQ', 0.783, 0.432,0.835,0.835], "JDT": ['JDT', 0.767,0.472,0.614,0.614], "LC": ['LC', 0.655,0.509,0.774,0.8], "ML": ['ML', 0.692,0.518,0.8,0], "PDE": ['PDE', 0.717,0.515,0.74,0.74],
-         "apache": ['apache', 0.717,0.47,0.746,0.746], "safe": ['safe', 0.818,0.528,0.772,0.772], "zxing": ['zxing', 0.650,0.557,0.631,0.631],
-         "ant-1.3": ['ant-1.3', 0.835,0.523,0,0],
-         "arc": ['arc', 0.701,0.476,0,0], "camel-1.0": ['camel-1.0', 0.639,0.484,0,0], "poi-1.5": ['poi-1.5', 0.701,0.499,0,0],
-         "redaktor": ['redaktor', 0.537,0.536,0.361,0.361], "skarbonka": ['skarbonka', 0.694,0.52,0.736,0.736], "tomcat": ['tomcat', 0.818,0.457,0,0],
-         "velocity-1.4": ['velocity-1.4', 0.391,0.527,0,0], "xalan-2.4": ['xalan-2.4', 0.751,0.452,0,0],
-         "xerces-1.2": ['xerces-1.2', 0.489,0.494,0,0],
-         "cm1": ['cm1', 0.717,0.513,0.702,0.702], "mw1": ['mw1', 0.727,0.602,0.482,0.482], "PC1": ['pc1', 0.752,0.493,0.263,0.263], "PC3": ['pc3', 0.738,0.508,0.76,0.76], "PC4": ['pc4', 0.682,0.546,0.585,0.585],
-         "ar1": ['ar1', 0.734,0.504,0.738,0.738], "ar3": ['ar3', 0.823,0.481,0.486,0.486],
-         "ar4": ['ar4', 0.816,0.454,0.549,0.549], "ar5": ['ar5', 0.911,0.554,0.423,0.423], "ar6": ['ar6', 0.640,0.578,0.295,0.295],
-         "method": ['Target', 'HDP-JC', 'PCA-ALL*0.15-apache', 'PCA-2-apache', 'PCA-2-Scipy']}
-  printout(out)
-
 if __name__ == "__main__":
+  random.seed(1)
   # readMatch()
   run()
   # printPCA()

@@ -149,17 +149,11 @@ def KSanalyzer(src, option=[], cutoff=0.05):
                 source = selectInstances(source, option)
               if "-T" in option and option[option.index("-T") + 1] == "S" :
                 target = selectInstances(target, option)
-              # print("="*30)
-              # print(len(source.data[0]))
-              # print(len(target.data[0]))
-
-
             X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
                                                                               group=source_group,
                                                                               target_src=target_name)
             if X["score"] > cutoff:
               best_pairs.append(X)
-  # pdb.set_trace()
   return best_pairs
 
 
