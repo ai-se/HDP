@@ -34,6 +34,12 @@ def getMedian(lst):
   else:
     return round((lst[int(len(lst) * 0.5 - 0.5)] + lst[int(len(lst) * 0.5 + 0.5)]) / 2, 3)
 
+def getIQR(lst):
+  def p(x) : return lst[int(x)]
+  n = int(len(lst)*0.25)
+  IQR = p(n*3) - p(n*1)
+  return IQR
+
 
 def process(match, target_src, result):
   total = []
@@ -95,7 +101,7 @@ def printout(result_dict):
 
 def repeat(KSanalyzer, original_src, option):
   result, temp = {}, {}
-  for _ in xrange(5):
+  for _ in xrange(20):
     if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
       small_src = runSmall(option)  # generate small data sets
     source_target_match = KSanalyzer(original_src, option)
@@ -103,12 +109,12 @@ def repeat(KSanalyzer, original_src, option):
     for key, val in out.iteritems():
       temp[key] = temp.get(key, []) + val
   for key, val in temp.iteritems():
-    result[key] = [getMedian(sorted(val))]
+    result[key] = [getMedian(sorted(val)),getIQR(sorted(val))]
   return result
 
 
-def addResult(out, method, new):
-  out["method"] = out.get("method") + [method]
+def addResult(out, title, new):
+  out["method"] = out.get("method") + title
   for key, val in out.iteritems():
     if key == "method":
       continue
@@ -118,18 +124,18 @@ def addResult(out, method, new):
 
 def run(original_src="./dataset", option=["-S", "L", "-T", "S", "-N", 200]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
-  out = {"EQ": ['EQ', 0.783], "JDT": ['JDT', 0.767], "LC": ['LC', 0.655], "ML": ['ML', 0.692], "PDE": ['PDE', 0.717],
-         "apache": ['apache', 0.717], "safe": ['safe', 0.818], "zxing": ['zxing', 0.650], "ant-1.3": ['ant-1.3', 0.835],
-         "arc": ['arc', 0.701], "camel-1.0": ['camel-1.0', 0.639], "poi-1.5": ['poi-1.5', 0.701],
-         "redaktor": ['redaktor', 0.537], "skarbonka": ['skarbonka', 0.694], "tomcat": ['tomcat', 0.818],
-         "velocity-1.4": ['velocity-1.4', 0.391], "xalan-2.4": ['xalan-2.4', 0.751],
-         "xerces-1.2": ['xerces-1.2', 0.489], "cm1": ['cm1', 0.717], "mw1": ['mw1', 0.727], "PC1": ['pc1', 0.752],
-         "PC3": ['pc3', 0.738], "PC4": ['pc4', 0.682], "ar1": ['ar1', 0.734], "ar3": ['ar3', 0.823],
-         "ar4": ['ar4', 0.816], "ar5": ['ar5', 0.911], "ar6": ['ar6', 0.640], "method": ['Target', 'HDP-JC']}
+  out = {"EQ": ['EQ', 0.583,0.783], "JDT": ['JDT',0.795, 0.767], "LC": ['LC',0.575, 0.655], "ML": ['ML', 0.734,0.692], "PDE": ['PDE',0.684, 0.717],
+         "apache": ['apache',0.714, 0.717], "safe": ['safe',0.706, 0.818], "zxing": ['zxing',0.605, 0.650], "ant-1.3": ['ant-1.3',0.609, 0.835],
+         "arc": ['arc', 0.670,0.701], "camel-1.0": ['camel-1.0', 0.550,0.639], "poi-1.5": ['poi-1.5',0.707, 0.701],
+         "redaktor": ['redaktor',0.744, 0.537], "skarbonka": ['skarbonka',0.569, 0.694], "tomcat": ['tomcat',0.778, 0.818],
+         "velocity-1.4": ['velocity-1.4', 0.725,0.391], "xalan-2.4": ['xalan-2.4',0.755, 0.751],
+         "xerces-1.2": ['xerces-1.2', 0.624,0.489], "cm1": ['cm1', 0.653,0.717], "mw1": ['mw1', 0.612,0.727], "PC1": ['pc1', 0.787,0.752],
+         "PC3": ['pc3', 0.794,0.738], "PC4": ['pc4',0.900, 0.682], "ar1": ['ar1', 0.582,0.734], "ar3": ['ar3', 0.574,0.823],
+         "ar4": ['ar4',0.657, 0.816], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.640], "method": ['Target', 'WPDP','HDP-JC']}
   # original_src = runPCA()
-  out = addResult(out, 'HDP-Scipy', repeat(KSanalyzer, original_src, []))
+  out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
-    title = 'N-' + str(num)
+    title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[-1] = num
     out = addResult(out, title, repeat(KSanalyzer, original_src, option))
   printout(out)
