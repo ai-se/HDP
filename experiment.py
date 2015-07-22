@@ -66,6 +66,7 @@ def run1(source_target_match, option):
   out = {}
   original_src = "./dataset"
   datasrc = readsrc(original_src)
+  pdb.set_trace()
   for group, srclst in datasrc.iteritems():
     for target_src in srclst:
       data = loadWekaData(target_src)
@@ -141,8 +142,35 @@ def run(original_src="./dataset", option=["-S", "L", "-T", "S", "-N", 200]):
   printout(out)
 
 
+def test():
+  match = readMatch("./result/Large_Small_match.txt")
+  original_src = "./dataset"
+  datasrc = readsrc(original_src)
+  last = ""
+  EPV = {}
+  for group,val in datasrc.iteritems():
+    for src in val:
+      temp = 0
+      count = 0
+      for i in match:
+        if i.target_src == src:
+          data = loadWekaData("./Small"+i.target_src[2:])
+          num_bug = len(data.attributeToDoubleArray(data.classIndex())) - sum(data.attributeToDoubleArray(data.classIndex()))
+          temp += float(num_bug/len(i.attr_target))
+          count += 1
+      EPV[src[src.rfind("/")+1:src.rfind(".")]] = round(temp/count,3)
+  # pdb.set_trace()
+  for key, val in EPV.iteritems():
+    print(key, ':',val)
+  print(EPV)
+
+
+
+
 if __name__ == "__main__":
   random.seed(1)
+  test()
   # readMatch()
-  run()
+  # run()
   # printPCA()
+
