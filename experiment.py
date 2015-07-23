@@ -41,24 +41,23 @@ def getIQR(lst):
   return IQR
 
 
-def process(match, target_src, result):
+def process(match, target_name, result):
   total = []
   for i in match:
     one_source_result = None
-    if i.target_src == target_src:
+    if i.target_name == target_name:
       one_source_result = [j.result[0] for j in result if j.source_src == i.source_src and j.result != []]
-      # put all the results from one source
-      # together.
+      # put all the results from one source together.
     if not one_source_result:
       continue
     one_median = getMedian(sorted(one_source_result))
     # print(i.source_src, "===>", target_src, one_median)
     total += [one_median]
   if len(total) == 0:
-    print("no results for ", target_src)
+    print("no results for ", target_name)
     return
   total_median = getMedian(sorted(total))
-  print("final ====>", target_src, total_median)
+  print("final ====>", target_name, total_median)
   return total_median
 
 
@@ -66,7 +65,6 @@ def run1(source_target_match, option):
   out = {}
   original_src = "./dataset"
   datasrc = readsrc(original_src)
-  pdb.set_trace()
   for group, srclst in datasrc.iteritems():
     for target_src in srclst:
       data = loadWekaData(target_src)
@@ -79,13 +77,14 @@ def run1(source_target_match, option):
                       ["-N", "2", "-F", "2", "-S", "1"])
         # out_wpdp += wpdp(tarin, test)
         # cpdp(group,one)
-        temp = hdp(option, target_src, source_target_match)
+        target_name = target_src[target_src.rindex("/") + 1:]
+        temp = hdp(option, target_name, source_target_match)
         if len(temp) == 0:
           continue
         else:
           out_hdp += temp
       dataset = target_src[target_src.rindex("/") + 1:-5]  # get name of datset
-      result = process(source_target_match, target_src, out_hdp)
+      result = process(source_target_match, target_name, out_hdp)
       out[dataset] = out.get(dataset, []) + [result]
       print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   return out
@@ -100,12 +99,15 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option):
+def repeat(KSanalyzer, original_src, option, iteration = 5):
   result, temp = {}, {}
-  for _ in xrange(20):
+  for _ in xrange(iteration):
     if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
-      small_src = runSmall(option)  # generate small data sets
-    source_target_match = KSanalyzer(original_src, option)
+      small_src = genSmall(option)  # generate small data sets
+    if "-EPV" in option:
+      source_target_match = KSanalyzer("./EPVSmalldataset","./Smalldataset", option)
+    else:
+      source_target_match = KSanalyzer(original_src,original_src, option)
     out = run1(source_target_match, option)
     for key, val in out.iteritems():
       temp[key] = temp.get(key, []) + val
@@ -123,7 +125,7 @@ def addResult(out, title, new):
   return out
 
 
-def run(original_src="./dataset", option=["-S", "L", "-T", "S", "-N", 200]):
+def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-EPV",10,"-N", 50]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   out = {"EQ": ['EQ', 0.583,0.783], "JDT": ['JDT',0.795, 0.767], "LC": ['LC',0.575, 0.655], "ML": ['ML', 0.734,0.692], "PDE": ['PDE',0.684, 0.717],
          "apache": ['apache',0.714, 0.717], "safe": ['safe',0.706, 0.818], "zxing": ['zxing',0.605, 0.650], "ant-1.3": ['ant-1.3',0.609, 0.835],
@@ -135,9 +137,9 @@ def run(original_src="./dataset", option=["-S", "L", "-T", "S", "-N", 200]):
          "ar4": ['ar4',0.657, 0.816], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.640], "method": ['Target', 'WPDP','HDP-JC']}
   # original_src = runPCA()
   out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
-  for num in range(50, 250, 50):
+  for num in range(50, 150, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
-    option[-1] = num
+    option[option.index("-N")+1] = num
     out = addResult(out, title, repeat(KSanalyzer, original_src, option))
   printout(out)
 
@@ -169,8 +171,8 @@ def test():
 
 if __name__ == "__main__":
   random.seed(1)
-  test()
+  # test()
   # readMatch()
-  # run()
+  run()
   # printPCA()
 

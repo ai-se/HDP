@@ -282,17 +282,37 @@ def small(data_src, option):
   :para option: parameters for filter
   :type option: list
   """
+
+  def numBuggyInstance(data):
+    return len(data.attributeToDoubleArray(data.classIndex())) - sum(data.attributeToDoubleArray(data.classIndex()))
+
+  def selectInstanceByClass(data, num, threshold, classID):
+    while num > threshold:
+      index = [k for k, i in enumerate(data.attributeToDoubleArray(data.classIndex())) if i == classID]
+      random_index = random.choice(index)
+      data.remove(random_index)
+      num = num - 1
+    return data
+
   arff = loadWekaData(data_src)  # re-read the data
   numInstance = arff.numInstances()
   while numInstance > option[option.index("-N") + 1]:
     random_index = random.randint(0, numInstance - 1)
     arff.remove(random_index)
     numInstance -= 1
-    createfolder("./Small" + data_src[2:data_src.rfind("/")])
+  createfolder("./Small" + data_src[2:data_src.rfind("/")])
   save(arff, "./Small" + data_src[2:])
+  if option.index("-EPV") and option[option.index("-EPV") + 1] != 0:
+    data = loadWekaData(data_src)  # re-read the data
+    num_instance = data.numInstances()
+    if num_instance > option[option.index("-N") + 1]:
+      data = selectInstanceByClass(data, numBuggyInstance(data), option[option.index("-EPV") + 1], 0)
+      data = selectInstanceByClass(data, data.numInstances(), option[option.index("-N") + 1], 1)
+    createfolder("./EPVSmall" + data_src[2:data_src.rfind("/")])
+    save(data, "./EPVSmall" + data_src[2:])
 
 
-def runSmall(option=["-N", "200"]):
+def genSmall(option):
   datasrc = readsrc()
   for group, srclst in datasrc.iteritems():
     for one in srclst:

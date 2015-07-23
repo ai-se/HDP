@@ -124,7 +124,7 @@ def selectRows(old_data, option):
   return old_data
 
 
-def KSanalyzer(src, option=[], cutoff=0.05):
+def KSanalyzer(source_src, target_src, option=[], cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
   :param src : src of KS test data
@@ -134,24 +134,24 @@ def KSanalyzer(src, option=[], cutoff=0.05):
   :return pairs of matched data
   :rtype: list
   """
-  data = read(src)
+  target_data = read(target_src)
+  source_data = read(source_src)
   best_pairs = []
-  selected_features = attributeSelection(data)
-  for target_group, targetlst in data.iteritems():
+  selected_features = attributeSelection(source_data)
+  for target_group, targetlst in target_data.iteritems():
     for target in targetlst:
-      for source_group, sourcelst in data.iteritems():
+      for source_group, sourcelst in source_data.iteritems():
         if target_group != source_group:
           for source in sourcelst:
             source_name = source["name"]
             target_name = target["name"]
-            if len(option) >= 2:  # select some rows for KS test
+            if len(option) >= 2 and not option.index("-EPV"):  # select some rows for KS test, when no EPV
               if "-S" in option and option[option.index("-S") + 1] == "S" :
                 source = selectInstances(source, option)
               if "-T" in option and option[option.index("-T") + 1] == "S" :
                 target = selectInstances(target, option)
-            X = KStest(source, target, selected_features[source_name]).update(source_src=source_name,
-                                                                              group=source_group,
-                                                                              target_src=target_name)
+            X = KStest(source, target, selected_features[source_name])\
+              .update(source_src=source_name,group=source_group,target_name=target_name[target_name.rindex("/")+1:]) # source is the src, target is the name of data file
             if X["score"] > cutoff:
               best_pairs.append(X)
   return best_pairs
@@ -178,7 +178,7 @@ def call(source_src, target_src, source_attr, target_attr):
     return []
 
 
-def hdp(option, target_src, source_target_match):
+def hdp(option, target, source_target_match):
   """
    source_target_match = KSanalyzer()
   :param option : options for small or large datasets
@@ -191,18 +191,12 @@ def hdp(option, target_src, source_target_match):
   :rtype: list
   """
   result = []
-  target_name = target_src
   for i in source_target_match:
-    if i.target_src == target_name:  # for all
+    if i.target_name == target:
       source_attr = i.attr_source
       target_attr = i.attr_target
-      match_source_src = i.source_src
-      if option and option[option.index("-S")+1] == "S":
-        source_src = "./Small"+i.source_src[2:] # here use small data set to test
-      else:
-        source_src = match_source_src
-      result.append(o(result=call(source_src, "./exp/train.arff", source_attr, target_attr), source_src=match_source_src))
-      result.append(o(result=call(source_src, "./exp/test.arff", source_attr, target_attr), source_src=match_source_src))
+      result.append(o(result=call(i.source_src, "./exp/train.arff", source_attr, target_attr), source_src=i.source_src))
+      result.append(o(result=call(i.source_src, "./exp/test.arff", source_attr, target_attr), source_src=i.source_src))
   return result
 
 
