@@ -304,9 +304,9 @@ def small(data_src, option):
   save(arff, "./Small" + data_src[2:])
   if option.index("-EPV") and option[option.index("-EPV") + 1] != 0:
     data = loadWekaData(data_src)  # re-read the data
+    data = selectInstanceByClass(data, numBuggyInstance(data), option[option.index("-EPV") + 1], 0)
     num_instance = data.numInstances()
     if num_instance > option[option.index("-N") + 1]:
-      data = selectInstanceByClass(data, numBuggyInstance(data), option[option.index("-EPV") + 1], 0)
       data = selectInstanceByClass(data, data.numInstances(), option[option.index("-N") + 1], 1)
     createfolder("./EPVSmall" + data_src[2:data_src.rfind("/")])
     save(data, "./EPVSmall" + data_src[2:])

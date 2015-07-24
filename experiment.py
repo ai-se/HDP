@@ -99,7 +99,7 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option, iteration = 5):
+def repeat(KSanalyzer, original_src, option, iteration = 20):
   result, temp = {}, {}
   for _ in xrange(iteration):
     if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
@@ -137,7 +137,7 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-EPV",10,"-N", 
          "ar4": ['ar4',0.657, 0.816], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.640], "method": ['Target', 'WPDP','HDP-JC']}
   # original_src = runPCA()
   out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
-  for num in range(50, 150, 50):
+  for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num
     out = addResult(out, title, repeat(KSanalyzer, original_src, option))
