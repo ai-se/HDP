@@ -1,19 +1,17 @@
 # __author__ = 'WeiFu'
 from __future__ import print_function, division
 import jnius_config
-jnius_config.add_options('-Xrs', '-Xmx6096')
-jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar',
-                           '/Users/FuWei/Github/HDP/jar/weka.jar',
+
+jnius_config.add_options('-Xrs', '-Xmx4096m')
+jnius_config.set_classpath('.', '/Users/WeiFu/Github/HDP_Jython/jar/weka.jar', '/Users/FuWei/Github/HDP/jar/weka.jar',
                            '/Users/WeiFu/Github/HDP_Jython/jar/commons-math3-3.5/commons-math3-3.5.jar',
-                           '/Users/FuWei/Github/HDP/jar/commons-math3-3.5/commons-math3-3.5.jar'
-                           )
+                           '/Users/FuWei/Github/HDP/jar/commons-math3-3.5/commons-math3-3.5.jar')
 import pdb
 import random
 import os
 from os import listdir
 from os.path import isfile, join
 from jnius import autoclass
-
 
 
 class o:
@@ -33,6 +31,14 @@ class o:
     keys = [k for k in sorted(i.__dict__.keys()) if k[0] is not "_"]
     show = [":%s %s" % (k, i.__dict__[k]) for k in keys]
     return '{' + ' '.join(show) + '}'
+
+
+def printm(matrix):
+  s = [[str(e) for e in row] for row in matrix]
+  lens = [max(map(len, col)) for col in zip(*s)]
+  fmt = ' | '.join('{{:{}}}'.format(x) for x in lens)
+  for row in [fmt.format(*row) for row in s]:
+    print(row)
 
 
 def enumerateToList(enum):
@@ -61,8 +67,8 @@ def read(src="./dataset"):
     path = join(src, f)
     for val in [join(path, i) for i in listdir(path) if i != ".DS_Store"]:
       arff = loadWekaData(val)
-      attributes = [str(i)[str(i).find("@attribute")+len("@attribute")+1:str(i).find("numeric")-1]
-                    for i in enumerateToList(arff.enumerateAttributes())]  # exclude the label
+      attributes = [str(i)[str(i).find("@attribute") + len("@attribute") + 1:str(i).find("numeric") - 1] for i in
+                    enumerateToList(arff.enumerateAttributes())]  # exclude the label
       columns = [arff.attributeToDoubleArray(i) for i in range(int(arff.classIndex()))]  # exclude the class label
       data[f] = data.get(f, []) + [o(name=val, attr=attributes, data=columns)]
   return data
@@ -107,11 +113,15 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
   :return: AUC
   :rtype: float
   """
+
   def getIndex(data, used_attr):
     # pdb.set_trace()
     del_attr = []
+    used_attr = [i[1:-1] if i[0] == "'" or i[0] == '"' else i for i in used_attr]
     for k, attr in enumerate(enumerateToList(data.enumerateAttributes())):
-      temp= str(attr)[str(attr).find("@attribute")+len("@attribute")+1:str(attr).find("numeric")-1]
+      temp = str(attr)[str(attr).find("@attribute") + len("@attribute") + 1:str(attr).find("numeric") - 1]
+      if temp[0] == "'":
+        temp = temp[1:-1]
       if temp not in used_attr:
         del_attr += [k]
     return del_attr
@@ -122,6 +132,9 @@ def wekaCALL(source_src, target_src, source_attr=[], test_attr=[], isHDP=False):
       data.deleteAttributeAt(i)
     return data
 
+  #
+  # if '-0.443dit...' in test_attr:
+  # pdb.set_trace()
   source_data = loadWekaData(source_src)
   target_data = loadWekaData(target_src)
   # cls = Classifier(classname="weka.classifiers.functions.Logistic")
@@ -167,6 +180,13 @@ def filter(data, toSave=False, file_name="test", filter_name="weka.filters.unsup
   return filtered
 
 
+def save(data_instance, src):
+  saver = autoclass('weka.core.converters.ArffSaver')()
+  saver.setInstances(data_instance)
+  saver.setFile(autoclass("java.io.File")(src))
+  saver.writeBatch()
+
+
 def featureSelection(data, num_of_attributes):
   """
   feature selection
@@ -188,47 +208,57 @@ def featureSelection(data, num_of_attributes):
   index = [i - 1 for i in features]  # for some reason, weka return index form 1-based not zero-based
   return index
 
-def selectInstances(old_data,option):
+
+def selectInstances(old_data, option):
   """
   :param old_data: the data to be selected
   :type old_data: o
   :para option: parameters for filter
   :type option: list
   """
-  arff = loadWekaData(old_data.name) # re-read the data
+  arff = loadWekaData(old_data.name)  # re-read the data
   numInstance = arff.numInstances()
-  while numInstance > option[option.index("-N")+1]:
-    random_index = random.randint(0,numInstance-1)
+  while numInstance > option[option.index("-N") + 1]:
+    random_index = random.randint(0, numInstance - 1)
     arff.remove(random_index)
-    numInstance -=1
-  attributes = [str(i)[str(i).find("@attribute")+len("@attribute")+1:str(i).find("numeric")-1]
-                for i in enumerateToList(arff.enumerateAttributes())]  # exclude the label
+    numInstance -= 1
+  attributes = [str(i)[str(i).find("@attribute") + len("@attribute") + 1:str(i).find("numeric") - 1] for i in
+                enumerateToList(arff.enumerateAttributes())]  # exclude the label
   columns = [arff.attributeToDoubleArray(i) for i in range(int(arff.classIndex()))]  # exclude the class label
   return o(name=old_data.name, attr=attributes, data=columns)
 
 
-def PCA(data_src="",ratio = 0.3):
+def PCA(data_src="", number_of_componets=2):
   def createfolder(src):
-    new_src = "./R"+src
+    new_src = "./R" + src
     if os.path.exists(new_src):
       return
     else:
-      os.makedirs(new_src) # generate new folders for each file
+      os.makedirs(new_src)  # generate new folders for each file
+
+  def deleteComponents(data):
+    for i in range(data.numAttributes() - 2, 0, -1):  # delete attributes from the back, except of clasl label
+      if i >= number_of_componets:
+        data.deleteAttributeAt(i)
+    return data
+
 
   data = loadWekaData(data_src)
   search = autoclass('weka.attributeSelection.Ranker')()
   evaluator = autoclass('weka.attributeSelection.PrincipalComponents')()
-  evaluator.setOptions(['-R','0.9','-A','1'])
+  evaluator.setOptions(['-R', '0.9', '-A', '1'])
   attsel = autoclass('weka.attributeSelection.AttributeSelection')()
   attsel.setSearch(search)
   attsel.setEvaluator(evaluator)
   attsel.SelectAttributes(data)
   reduced_data = attsel.reduceDimensionality(data)
+  reduced_data = deleteComponents(reduced_data)
   createfolder(data_src[2:data_src.rfind("/")])
   saver = autoclass('weka.core.converters.ArffSaver')()
   saver.setInstances(reduced_data)
   saver.setFile(autoclass("java.io.File")("./R" + data_src[2:]))
   saver.writeBatch()
+
 
 def runPCA():
   datasrc = readsrc()
@@ -236,6 +266,59 @@ def runPCA():
     for one in srclst:
       PCA(one)
   return "./Rdataset"
+
+
+def createfolder(new_src):
+  if os.path.exists(new_src):
+    return
+  else:
+    os.makedirs(new_src)  # generate new folders for each file
+
+
+def small(data_src, option):
+  """
+  :param data_src: src of data
+  :type data_src: str
+  :para option: parameters for filter
+  :type option: list
+  """
+
+  def numBuggyInstance(data):
+    return len(data.attributeToDoubleArray(data.classIndex())) - sum(data.attributeToDoubleArray(data.classIndex()))
+
+  def selectInstanceByClass(data, num, threshold, classID):
+    while num > threshold:
+      index = [k for k, i in enumerate(data.attributeToDoubleArray(data.classIndex())) if i == classID]
+      random_index = random.choice(index)
+      data.remove(random_index)
+      num = num - 1
+    return data
+
+  arff = loadWekaData(data_src)  # re-read the data
+  numInstance = arff.numInstances()
+  while numInstance > option[option.index("-N") + 1]:
+    random_index = random.randint(0, numInstance - 1)
+    arff.remove(random_index)
+    numInstance -= 1
+  createfolder("./Small" + data_src[2:data_src.rfind("/")])
+  save(arff, "./Small" + data_src[2:])
+  if option.index("-EPV") and option[option.index("-EPV") + 1] != 0:
+    data = loadWekaData(data_src)  # re-read the data
+    data = selectInstanceByClass(data, numBuggyInstance(data), option[option.index("-EPV") + 1], 0)
+    num_instance = data.numInstances()
+    if num_instance > option[option.index("-N") + 1]:
+      data = selectInstanceByClass(data, data.numInstances(), option[option.index("-N") + 1], 1)
+    createfolder("./EPVSmall" + data_src[2:data_src.rfind("/")])
+    save(data, "./EPVSmall" + data_src[2:])
+
+
+def genSmall(option):
+  datasrc = readsrc()
+  for group, srclst in datasrc.iteritems():
+    for one in srclst:
+      small(one, option)
+  return "./Smalldataset"
+
 
 if __name__ == "__main__":
   # read()
