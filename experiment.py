@@ -23,7 +23,7 @@ def readMatch(src="./result/source_target_match.txt"):
     source_src = (each[each.index("source_src") + len("source_src") + 1:each.index("target_src") - 2])
     target_src = (each[each.index("target_src") + len("target_src") + 1:])
     temp = o(score=score, attr_source=attr_source, attr_target=attr_target, source_src=source_src,
-             target_src=target_src)
+             target_name=target_src)
     result.append(temp)
   return result
 
@@ -57,7 +57,7 @@ def process(match, target_name, result):
     print("no results for ", target_name)
     return
   total_median = getMedian(sorted(total))
-  print("final ====>", target_name, total_median)
+  # print("final ====>", target_name, total_median)
   return total_median
 
 
@@ -69,15 +69,15 @@ def run1(source_target_match, option):
     for target_src in srclst:
       data = loadWekaData(target_src)
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
+      target_name = target_src[target_src.rindex("/") + 1:]
       for _ in xrange(10):
         randomized = filter(data, False, "", "weka.filters.unsupervised.instance.Randomize", ["-S", str(_)])
         train = filter(randomized, True, "train", "weka.filters.unsupervised.instance.RemoveFolds",
-                       ["-N", "2", "-F", "1", "-S", "1"])
+                       ["-N", "2", "-F", "1", "-S", "1"]) # N : numFolds, F: whichFold to keep, S: is the seed
         test = filter(randomized, True, "test", "weka.filters.unsupervised.instance.RemoveFolds",
                       ["-N", "2", "-F", "2", "-S", "1"])
         # out_wpdp += wpdp(tarin, test)
         # cpdp(group,one)
-        target_name = target_src[target_src.rindex("/") + 1:]
         temp = hdp(option, target_name, source_target_match)
         if len(temp) == 0:
           continue
@@ -125,7 +125,7 @@ def addResult(out, title, new):
   return out
 
 
-def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-EPV",10,"-N", 50]):
+def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 50]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   out = {"EQ": ['EQ', 0.583,0.783], "JDT": ['JDT',0.795, 0.767], "LC": ['LC',0.575, 0.655], "ML": ['ML', 0.734,0.692], "PDE": ['PDE',0.684, 0.717],
          "apache": ['apache',0.714, 0.717], "safe": ['safe',0.706, 0.818], "zxing": ['zxing',0.605, 0.650], "ant-1.3": ['ant-1.3',0.609, 0.835],
@@ -135,8 +135,8 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S", "-EPV",10,"-N", 
          "xerces-1.2": ['xerces-1.2', 0.624,0.489], "cm1": ['cm1', 0.653,0.717], "mw1": ['mw1', 0.612,0.727], "PC1": ['pc1', 0.787,0.752],
          "PC3": ['pc3', 0.794,0.738], "PC4": ['pc4',0.900, 0.682], "ar1": ['ar1', 0.582,0.734], "ar3": ['ar3', 0.574,0.823],
          "ar4": ['ar4',0.657, 0.816], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.640], "method": ['Target', 'WPDP','HDP-JC']}
-  # original_src = runPCA()
-  out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
+  original_src = runPCA()
+  # out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num
