@@ -128,8 +128,10 @@ def selectRows(old_data, option):
 def KSanalyzer(source_src, target_src, option=[], cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
-  :param src : src of KS test data
-  :type src : str
+  :param source_src : src of KS source data sets
+  :type source_src: str
+  :param target_src: src of KS target data sets
+  :type target_src : src
   :param option: set the Large or small data set for KS test, here small means using unsupervised or supervised methods to select rows
   :type option: list
   :return pairs of matched data
