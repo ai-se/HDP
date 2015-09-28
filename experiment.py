@@ -135,8 +135,7 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 5
          "xerces-1.2": ['xerces-1.2', 0.624,0.489], "cm1": ['cm1', 0.653,0.717], "mw1": ['mw1', 0.612,0.727], "PC1": ['pc1', 0.787,0.752],
          "PC3": ['pc3', 0.794,0.738], "PC4": ['pc4',0.900, 0.682], "ar1": ['ar1', 0.582,0.734], "ar3": ['ar3', 0.574,0.823],
          "ar4": ['ar4',0.657, 0.816], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.640], "method": ['Target', 'WPDP','HDP-JC']}
-  original_src = runPCA()
-  # out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
+  out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num
