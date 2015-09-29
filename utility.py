@@ -204,9 +204,7 @@ def featureSelection(data, num_of_attributes):
   attsel.setSearch(search)
   attsel.setEvaluator(evaluator)
   attsel.SelectAttributes(data)
-  features = attsel.selectedAttributes()[:num_of_attributes]
-  index = [i - 1 for i in features]  # for some reason, weka return index form 1-based not zero-based
-  return index
+  return attsel.selectedAttributes()[:num_of_attributes]
 
 
 def selectInstances(old_data, option):
@@ -242,7 +240,6 @@ def PCA(data_src="", number_of_componets=2):
         data.deleteAttributeAt(i)
     return data
 
-
   data = loadWekaData(data_src)
   search = autoclass('weka.attributeSelection.Ranker')()
   evaluator = autoclass('weka.attributeSelection.PrincipalComponents')()
@@ -275,6 +272,10 @@ def createfolder(new_src):
     os.makedirs(new_src)  # generate new folders for each file
 
 
+def numBuggyInstance(data):
+  return len(data.attributeToDoubleArray(data.classIndex())) - sum(data.attributeToDoubleArray(data.classIndex()))
+  # clean = 1, buggy:0
+
 def small(data_src, option):
   """
   :param data_src: src of data
@@ -282,9 +283,6 @@ def small(data_src, option):
   :para option: parameters for filter
   :type option: list
   """
-
-  def numBuggyInstance(data):
-    return len(data.attributeToDoubleArray(data.classIndex())) - sum(data.attributeToDoubleArray(data.classIndex()))
 
   def selectInstanceByClass(data, num, threshold, classID):
     while num > threshold:
@@ -302,12 +300,12 @@ def small(data_src, option):
     numInstance -= 1
   createfolder("./Small" + data_src[2:data_src.rfind("/")])
   save(arff, "./Small" + data_src[2:])
-  if option.index("-EPV") and option[option.index("-EPV") + 1] != 0:
+  if "-EPV" in option  and option[option.index("-EPV") + 1] != 0:
     data = loadWekaData(data_src)  # re-read the data
-    data = selectInstanceByClass(data, numBuggyInstance(data), option[option.index("-EPV") + 1], 0)
+    data = selectInstanceByClass(data, numBuggyInstance(data), option[option.index("-EPV") + 1], 0) # keep "-EPV" numbers of defective data
     num_instance = data.numInstances()
     if num_instance > option[option.index("-N") + 1]:
-      data = selectInstanceByClass(data, data.numInstances(), option[option.index("-N") + 1], 1)
+      data = selectInstanceByClass(data, data.numInstances(), option[option.index("-N") + 1], 1) # remove those additional non-defective data to get a  data set with "N" instances.
     createfolder("./EPVSmall" + data_src[2:data_src.rfind("/")])
     save(data, "./EPVSmall" + data_src[2:])
 

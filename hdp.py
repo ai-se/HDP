@@ -5,6 +5,7 @@ from utility import *
 from scipy import stats
 import numpy as np
 import networkx as nx
+from Sample import *
 
 def transform(d, selected=[]):
   """
@@ -127,8 +128,10 @@ def selectRows(old_data, option):
 def KSanalyzer(source_src, target_src, option=[], cutoff=0.05):
   """
   for each target data set, find a best source data set in terms of p-values
-  :param src : src of KS test data
-  :type src : str
+  :param source_src : src of KS source data sets
+  :type source_src: str
+  :param target_src: src of KS target data sets
+  :type target_src : src
   :param option: set the Large or small data set for KS test, here small means using unsupervised or supervised methods to select rows
   :type option: list
   :return pairs of matched data
@@ -145,7 +148,7 @@ def KSanalyzer(source_src, target_src, option=[], cutoff=0.05):
           for source in sourcelst:
             source_name = source["name"]
             target_name = target["name"]
-            if len(option) >= 2 and not option.index("-EPV"):  # select some rows for KS test, when no EPV
+            if len(option) >= 2 and "-EPV" not in option:  # select some rows for KS test, when no EPV
               if "-S" in option and option[option.index("-S") + 1] == "S" :
                 source = selectInstances(source, option)
               if "-T" in option and option[option.index("-T") + 1] == "S" :
@@ -195,6 +198,9 @@ def hdp(option, target, source_target_match):
     if i.target_name == target:
       source_attr = i.attr_source
       target_attr = i.attr_target
+      # pdb.set_trace()
+      # test = chops(i, i.source_src,source_attr)
+      # pdb.set_trace()
       result.append(o(result=call(i.source_src, "./exp/train.arff", source_attr, target_attr), source_src=i.source_src))
       result.append(o(result=call(i.source_src, "./exp/test.arff", source_attr, target_attr), source_src=i.source_src))
   return result
