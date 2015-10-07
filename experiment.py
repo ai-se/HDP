@@ -102,9 +102,10 @@ def printout(result_dict):
 def repeat(KSanalyzer, original_src, option, iteration = 20):
   result, temp = {}, {}
   for _ in xrange(iteration):
-    if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
+    if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S") and "-EPV" not in option:
       small_src = genSmall(option)  # generate small data sets
-    if "-EPV" in option:
+      source_target_match = KSanalyzer("./Smalldataset","./Smalldataset",option)
+    elif option and "-EPV" in option:
       source_target_match = KSanalyzer("./EPVSmalldataset","./Smalldataset", option)
     else:
       source_target_match = KSanalyzer(original_src,original_src, option)
@@ -125,7 +126,7 @@ def addResult(out, title, new):
   return out
 
 
-def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 50]):
+def run(original_src="./dataset", option=["-S", "S", "-T", "S","-N", 50]):
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   out = {"EQ": ['EQ', 0.583,0.783], "JDT": ['JDT',0.795, 0.767], "LC": ['LC',0.575, 0.655], "ML": ['ML', 0.734,0.692], "PDE": ['PDE',0.684, 0.717],
          "apache": ['apache',0.714, 0.717], "safe": ['safe',0.706, 0.818], "zxing": ['zxing',0.605, 0.650], "ant-1.3": ['ant-1.3',0.609, 0.835],
@@ -135,7 +136,7 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 5
          "xerces-1.2": ['xerces-1.2', 0.624,0.489], "cm1": ['cm1', 0.653,0.717], "mw1": ['mw1', 0.612,0.727], "PC1": ['pc1', 0.787,0.752],
          "PC3": ['pc3', 0.794,0.738], "PC4": ['pc4',0.900, 0.682], "ar1": ['ar1', 0.582,0.734], "ar3": ['ar3', 0.574,0.823],
          "ar4": ['ar4',0.657, 0.816], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.640], "method": ['Target', 'WPDP','HDP-JC']}
-  out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
+  # out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num

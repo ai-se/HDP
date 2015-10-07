@@ -76,7 +76,7 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
-      # result = test.kolmogorovSmirnovTest(val1, val2)
+      # result = test.kolmogorovSmirnovTest(val1, val2) # this is the java version of KS test
       temp = stats.ks_2samp(val1, val2)
       result = temp[1]
       if result > cutoff:
