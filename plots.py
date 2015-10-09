@@ -1,15 +1,15 @@
 from __future__ import division
 # __author__ = 'WeiFu'
+import pdb
 from matplotlib import pyplot as plt
 import numpy as np
-
 
 def printdic(out):
   for key, val in out.iteritems():
     print key + " " + str(val) + "\n"
 
 
-def getData(src="./result/0924/epv=10_2_0924_with_SCIPY.txt"):
+def getData(src="./result/1008/1008_random_N.txt"):
   def toFloat(x):
     try:
       return float(x)
@@ -19,15 +19,21 @@ def getData(src="./result/0924/epv=10_2_0924_with_SCIPY.txt"):
   out = {}
   f = open(src, "r")
   content = f.read().splitlines()
+  names = ["HDP-Scipy","N-50","N-100","N-150","N-200"]
+  names_index = [ k for k, i in enumerate(content[0].split("|")) if i.strip() in names]
   for row in content[1:]:
     cell = [toFloat(i.strip()) for i in row.split("|")]
-    out[cell[0]] = [cell[2], cell[3], cell[5], cell[7], cell[9]]
+    out[cell[0]] = [cell[i] for i in names_index]
   # printdic(out)
   return out
 
 
 def run(N=4):
   data = getData()
+  label = {'EQ':'a','JDT':'b','LC':'c','ML':'d','PDE':'e','apache':'f','safe':'g','zxing':'h',
+           'ant-1.3':'i','arc':'j','camel-1.0':'k','poi-1.5':'l','redaktor':'m','skarbonka':'n',
+           'tomcat':'o','velocity-1.4':'p','xalan-2.4':'q','xerces-1.2':'r','cm1':'s','mw1':'t',
+           'pc1':'u','pc3':'v','pc4':'w','ar1':'x','ar3':'y','ar4':'z','ar5':'aa','ar6':'bb'}
   samplesize = [50, 100, 150, 200]
   x = np.linspace(0, 27, 28)
   f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
@@ -40,11 +46,17 @@ def run(N=4):
     onePlot_sorted = sorted(onePlot.items(), key=lambda x: x[-1][-1])
     base = [i[-1][0] for i in onePlot_sorted]
     proposed = [i[-1][1] for i in onePlot_sorted]
+    label_sorted = [ label[i[0]] for i in onePlot_sorted]
+    print [i[0] for i in onePlot_sorted]
+    print label_sorted
+    for i,z in enumerate(x[:]):
+      y = max(base[i],proposed[i])
+      ax_lst[num].annotate(label_sorted[i], xy = (z,y+0.09), textcoords = "data")
 
     ax_lst[num].plot(x, base, 'ko-', label='All Data')
     ax_lst[num].plot(x, proposed, 'ro-', label='Sampled with N= ' + str(samplesize[num]), color=cols[num])
     ax_lst[num].legend(fontsize='small',loc = 0)
-    ax_lst[num].set_xlim([0, 28])
+    ax_lst[num].set_xlim([-1, 28])
     ax_lst[num].set_ylim([0, 1])
     ax_lst[num].set_yticks(np.arange(0.3, 0.9, 0.3))
   f.subplots_adjust(wspace=0, hspace=0)
