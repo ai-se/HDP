@@ -204,7 +204,7 @@ def featureSelection(data, num_of_attributes):
   attsel.setSearch(search)
   attsel.setEvaluator(evaluator)
   attsel.SelectAttributes(data)
-  return attsel.selectedAttributes()[:num_of_attributes]
+  return attsel.selectedAttributes()[:num_of_attributes] # this is the place where has a bug.
 
 
 def selectInstances(old_data, option):
