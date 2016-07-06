@@ -9,7 +9,8 @@ def printdic(out):
     print key + " " + str(val) + "\n"
 
 
-def getData(src="./result/1008/1008_random_N.txt"):
+def getData(src="./result/0929/epv=10*2_with_scipy.txt"):
+  src="./result/1008/1008_random_N.txt"
   def toFloat(x):
     try:
       return float(x)
@@ -33,7 +34,7 @@ def run(N=4):
   label = {'EQ':'a','JDT':'b','LC':'c','ML':'d','PDE':'e','apache':'f','safe':'g','zxing':'h',
            'ant-1.3':'i','arc':'j','camel-1.0':'k','poi-1.5':'l','redaktor':'m','skarbonka':'n',
            'tomcat':'o','velocity-1.4':'p','xalan-2.4':'q','xerces-1.2':'r','cm1':'s','mw1':'t',
-           'pc1':'u','pc3':'v','pc4':'w','ar1':'x','ar3':'y','ar4':'z','ar5':'aa','ar6':'bb'}
+           'pc1':'u','pc3':'v','pc4':'w','ar1':'x','ar3':'y','ar4':'z','ar5':'A','ar6':'B'}
   samplesize = [50, 100, 150, 200]
   x = np.linspace(0, 27, 28)
   f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
@@ -60,8 +61,9 @@ def run(N=4):
     ax_lst[num].set_ylim([0, 1])
     ax_lst[num].set_yticks(np.arange(0.3, 0.9, 0.3))
   f.subplots_adjust(wspace=0, hspace=0)
-  f.text(0.04, 0.5, 'Improvements', va='center', rotation='vertical', fontsize=11)
+  f.text(0.04, 0.5, 'AUC Improvements', va='center', rotation='vertical', fontsize=11)
   plt.xlabel('Data sets, sorted by improvements')
+  plt.savefig('sample.eps', format='eps',dpi= 1000)
   plt.show()
 
 
