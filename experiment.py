@@ -2,7 +2,7 @@
 from __future__ import division, print_function
 import time
 from hdp import *
-
+import pickle
 
 def readMatch(src="./result/source_target_match.txt"):
   def getStrip(lst):
@@ -41,12 +41,25 @@ def getIQR(lst):
   return IQR
 
 
-def process(match, target_name, result):
+def process(source_target_match, target_name, out_hdp):
+  """
+  :param source_target_match: all feasible source_data and target_data pair
+  :type list of class o instances
+  :param target_name: name of data set
+  :type string, e.g. 'ar1.arff'
+  :param out_hdp: results of hpd for one data set in experiments
+  :type list of class o instances
+  :return total_median: median value of all exp as the final prediction.
+  :type float
+
+  e.g. out_hdp[0] {:id 695 :result [0.648] :source_src ./dataset/AEEEM/EQ.arff}
+
+  """
   total = []
-  for i in match:
+  for i in source_target_match:
     one_source_result = None
     if i.target_name == target_name:
-      one_source_result = [j.result[0] for j in result if j.source_src == i.source_src and j.result != []]
+      one_source_result = [j.result[0] for j in out_hdp if j.source_src == i.source_src and j.result != []]
       # put all the results from one source together.
     if not one_source_result:
       continue
@@ -62,6 +75,30 @@ def process(match, target_name, result):
 
 
 def run1(source_target_match, option):
+  """
+  :param source_target_match: all feasible source_data and target_data pair
+  :type list of class o instances
+  :param option: specify which experiment is running
+  :type list of string
+  :return out : results of hdp experiments for all target in one repeat.
+  :type dict of list
+
+  e.g. of source_target_match[0]:
+
+  {:attr_source ['CountStmtExe', 'CountStmt', 'CountStmtDecl']
+   :attr_target ['ck_oo_lcom', 'ck_oo_numberOfLinesOfCode', 'ck_oo_rfc']
+   :group Relink
+   :id 60
+   :score 0.600689279613
+   :source_src ./dataset/Relink/safe.arff
+   :target_name EQ.arff}
+
+  e.g. of out :
+
+  {'camel-1.0': [0.654], 'skarbonka': [0.685].....}
+
+
+  """
   out = {}
   original_src = "./dataset"
   datasrc = readsrc(original_src)
@@ -99,7 +136,19 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option, iteration = 20):
+def repeat(KSanalyzer, original_src, option, iteration = 1):
+  """
+  :param KSanalyzer: KSanalyzer function
+  :type function
+  :param original_src: the original src of data set, e.g : './dataset'
+  :type basestring
+  :param option: specify which experiment is running
+  :type list of string
+  :param iteration: set the repeats of the whole experiment.
+  :type int
+  :return result: results of all target in iteration repeats.
+  :type dict of list
+  """
   result, temp = {}, {}
   for _ in xrange(iteration):
     if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S") and "-EPV" not in option:
@@ -117,16 +166,45 @@ def repeat(KSanalyzer, original_src, option, iteration = 20):
   return result
 
 
-def addResult(out, title, new):
-  out["method"] = out.get("method") + title
-  for key, val in out.iteritems():
+def addResult(result, title, new_option_result):
+  """
+  :param result: results of all target in iteration repeats for old exp
+  :type dict of list
+  :param title: the title of this experiment
+  :type list of string
+  :param new_option_result: results of hdp with the specific option
+  :type: dict of list
+  :return result: results of all target in iteration repeats for old and new exp.
+  :type: dict of list, the target name is leading in each list
+
+  e.g. of result
+  {'ar3': ['ar3', 0.574, 0.823], 'skarbonka': ['skarbonka', 0.569, 0.694].....}
+  """
+  result["method"] = result.get("method") + title
+  for key, val in result.iteritems():
     if key == "method":
       continue
-    out[key] = out.get(key) + new[key]
-  return out
+    result[key] = result.get(key) + new_option_result[key]
+  return result
 
 
 def run(original_src="./dataset", option=["-S", "S", "-T", "S","-N", 50]):
+  """
+  :param original_src: the original src of data set, e.g : './dataset'
+  :type basestring
+  :param option: parameters to control expriment
+  :type list
+  return None
+
+  e.g.
+  option=["-S", "S", "-T", "S","-N", 50]
+
+  "-S", "S": means the sourse is small set
+  "-T", "S": means the target is samll set
+  "-N", 50: means the size of data set is 50
+
+
+  """
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
   out = {"EQ": ['EQ', 0.583,0.783], "JDT": ['JDT',0.795, 0.767], "LC": ['LC',0.575, 0.655], "ML": ['ML', 0.734,0.692], "PDE": ['PDE',0.684, 0.717],
          "apache": ['apache',0.714, 0.717], "safe": ['safe',0.706, 0.818], "zxing": ['zxing',0.605, 0.650], "ant-1.3": ['ant-1.3',0.609, 0.835],
@@ -142,6 +220,9 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-N", 50]):
     option[option.index("-N")+1] = num
     out = addResult(out, title, repeat(KSanalyzer, original_src, option))
   printout(out)
+  pickle_result = open("result.pkl","wb") # pickle results
+  pickle.dump(out, pickle_result)
+
 
 
 def test():
