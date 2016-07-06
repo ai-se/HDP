@@ -49,7 +49,6 @@ def maximumWeighted(match, target_lst, source_lst):
     G.add_edge(key[0] + "source", key[1] + "target", weight=val)  # add suffix to make it unique
   result = nx.max_weight_matching(G)
   for key, val in result.iteritems():  # in Results, (A:B) and (B:A) both exist
-    pdb.set_trace()
     if key[:-6] in source_lst and val[:-6] in target_lst \
         and (key[:-6], val[:-6]) in match: # get rid of (A:B) exists but (B:A) not
       attr_target.append(val[:-6])
@@ -75,7 +74,7 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   source = transform(d_source, features)
   target = transform(d_target)
   target_lst, source_lst = [], []
-  test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
+  # test = autoclass('org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest')()
   for tar_feature, val1 in target.iteritems():
     for sou_feature, val2 in source.iteritems():
       # result = test.kolmogorovSmirnovTest(val1, val2) # this is the java version of KS test
