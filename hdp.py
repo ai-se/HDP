@@ -50,7 +50,10 @@ def maximumWeighted(match, target_lst, source_lst):
   result = nx.max_weight_matching(G)
   for key, val in result.iteritems():  # in Results, (A:B) and (B:A) both exist
     if key[:-6] in source_lst and val[:-6] in target_lst \
-        and (key[:-6], val[:-6]) in match: # get rid of (A:B) exists but (B:A) not
+        and (key[:-6], val[:-6]) in match : # get rid of (A:B) exists but (B:A) not
+      if key[:-6] in attr_source and val[:-6] in attr_target and\
+        attr_source.index(key[:-6]) == attr_target.index(val[:-6]):
+        continue # this is (A:B) already in attr_source and attr_target
       attr_target.append(val[:-6])
       attr_source.append(key[:-6])
       value += match[(key[:-6], val[:-6])]
@@ -64,7 +67,7 @@ def KStest(d_source, d_target, features, cutoff=0.05):
   :param d_source : source data
   :type d_source : o
   :param d_target: target data
-  :type d_target: o
+  :type d_target: os
   :param features: features selected for the source data set
   :type features : list
   :return : results of maximumWeighted
