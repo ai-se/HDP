@@ -107,7 +107,7 @@ def run1(source_target_match, option):
       data = loadWekaData(target_src)
       out_wpdp, out_cpdp, out_hdp = [], [], []  # store results for three methods
       target_name = target_src[target_src.rindex("/") + 1:]
-      for _ in xrange(1):
+      for _ in xrange(10):
         randomized = filter(data, False, "", "weka.filters.unsupervised.instance.Randomize", ["-S", str(_)])
         train = filter(randomized, True, "train", "weka.filters.unsupervised.instance.RemoveFolds",
                        ["-N", "2", "-F", "1", "-S", "1"]) # N : numFolds, F: whichFold to keep, S: is the seed
@@ -141,7 +141,7 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option, iteration = 1):
+def repeat(KSanalyzer, original_src, option, iteration = 20):
   """
   :param KSanalyzer: KSanalyzer function
   :type function
