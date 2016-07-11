@@ -159,7 +159,6 @@ def repeat(KSanalyzer, original_src, option, iteration = 20):
   for _ in xrange(iteration):
     if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
       small_src = genSmall(option)  # generate small data sets
-      pdb.set_trace()
       if  "-EPV" not in option:
         source_target_match = KSanalyzer("./Smalldataset","./Smalldataset",option)
       elif option and "-EPV" in option:
