@@ -141,7 +141,7 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option, iteration = 20):
+def repeat(KSanalyzer, original_src, option, iteration = 1):
   """
   :param KSanalyzer: KSanalyzer function
   :type function
@@ -155,12 +155,15 @@ def repeat(KSanalyzer, original_src, option, iteration = 20):
   :type dict of list
   """
   result, temp = {}, {}
+  source_target_match = None
   for _ in xrange(iteration):
-    if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S") and "-EPV" not in option:
+    if option and (option[option.index("-S") + 1] == "S" or option[option.index("-T") + 1] == "S"):
       small_src = genSmall(option)  # generate small data sets
-      source_target_match = KSanalyzer("./Smalldataset","./Smalldataset",option)
-    elif option and "-EPV" in option:
-      source_target_match = KSanalyzer("./EPVSmalldataset","./Smalldataset", option)
+      pdb.set_trace()
+      if  "-EPV" not in option:
+        source_target_match = KSanalyzer("./Smalldataset","./Smalldataset",option)
+      elif option and "-EPV" in option:
+        source_target_match = KSanalyzer("./EPVSmalldataset","./Smalldataset", option)
     else:
       source_target_match = KSanalyzer(original_src,original_src, option)
     out = run1(source_target_match, option)
@@ -193,7 +196,7 @@ def addResult(result, title, new_option_result):
   return result
 
 
-def run(original_src="./dataset", option=["-S", "S", "-T", "S","-N", 50]):
+def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 50]):
   """
   :param original_src: the original src of data set, e.g : './dataset'
   :type basestring
@@ -208,6 +211,11 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-N", 50]):
   "-T", "S": means the target is samll set
   "-N", 50: means the size of data set is 50
 
+  option=["-S", "S", "-T", "S","-EPV",20,"-N", 50]
+
+  if "-EPV" appear in the list, that means this will use -EPV trick with N=20,
+  only 20 defects included in the data.
+
 
   """
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
@@ -220,7 +228,7 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-N", 50]):
          "PC2":["PC2",0.748,0.884],"PC3": ['PC3', 0.794,0.730], "PC4": ['PC4',0.900, 0.668], "PC5":["PC5",0.954,0.806],"KC3":["KC3",0.609,0.678],"MC2":["MC2",0.646,0.677],
          "ar1": ['ar1', 0.582,0.727], "ar3": ['ar3', 0.574,0.823],
          "ar4": ['ar4',0.657, 0.798], "ar5": ['ar5',0.804, 0.902], "ar6": ['ar6',0.654, 0.667], "method": ['Target', 'WPDP','HDP-JC']}
-  out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
+  # out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num
