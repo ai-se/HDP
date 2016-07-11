@@ -141,7 +141,7 @@ def printout(result_dict):
   printm(out)
 
 
-def repeat(KSanalyzer, original_src, option, iteration = 1):
+def repeat(KSanalyzer, original_src, option, iteration = 20):
   """
   :param KSanalyzer: KSanalyzer function
   :type function
