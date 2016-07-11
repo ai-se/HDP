@@ -227,7 +227,7 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 5
          "PC2":["PC2",0.748,0.884],"PC3": ['PC3', 0.794,0.730], "PC4": ['PC4',0.900, 0.668], "PC5":["PC5",0.954,0.806],"KC3":["KC3",0.609,0.678],"MC2":["MC2",0.646,0.677],
          "ar1": ['ar1', 0.582,0.727], "ar3": ['ar3', 0.574,0.823],
          "ar4": ['ar4',0.657, 0.798], "ar5": ['ar5',0.804, 0.902], "ar6": ['ar6',0.654, 0.667], "method": ['Target', 'WPDP','HDP-JC']}
-  # out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
+  out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num
