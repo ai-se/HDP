@@ -10,7 +10,7 @@ def printdic(out):
 
 
 def getData(src="./result/0929/epv=10*2_with_scipy.txt"):
-  src="./result/1008/1008_random_N.txt"
+  src="./result/20160805/0712_EPV_10"
   def toFloat(x):
     try:
       return float(x)
@@ -33,10 +33,10 @@ def run(N=4):
   data = getData()
   label = {'EQ':'a','JDT':'b','LC':'c','ML':'d','PDE':'e','apache':'f','safe':'g','zxing':'h',
            'ant-1.3':'i','arc':'j','camel-1.0':'k','poi-1.5':'l','redaktor':'m','skarbonka':'n',
-           'tomcat':'o','velocity-1.4':'p','xalan-2.4':'q','xerces-1.2':'r','cm1':'s','mw1':'t',
-           'pc1':'u','pc3':'v','pc4':'w','ar1':'x','ar3':'y','ar4':'z','ar5':'A','ar6':'B'}
+           'tomcat':'o','velocity-1.4':'p','xalan-2.4':'q','xerces-1.2':'r','CM1':'s','MW1':'t',
+           'PC1':'u','PC3':'v','PC4':'w','JM1':'x','PC2':'y','PC5':'z','MC1':'A','MC2':'B','KC3':'C','ar1':'D','ar3':'E','ar4':'F','ar5':'G','ar6':'H',}
   samplesize = [50, 100, 150, 200]
-  x = np.linspace(0, 27, 28)
+  x = np.linspace(0, 33, 34)
   f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
   ax_lst = [ax1, ax2, ax3, ax4]
   cols = ['r', 'y', 'g', 'b']
