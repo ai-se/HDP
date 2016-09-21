@@ -10,7 +10,7 @@ def printdic(out):
 
 
 def getData(src="./result/0929/epv=10*2_with_scipy.txt"):
-  src="./result/20160805/0712_EPV_10"
+  src="./result/20160806/20160806_Small_N.txt"
   def toFloat(x):
     try:
       return float(x)
@@ -51,19 +51,19 @@ def run(N=4):
     print [i[0] for i in onePlot_sorted]
     print label_sorted
     for i,z in enumerate(x[:]):
-      y = max(base[i],proposed[i])
-      ax_lst[num].annotate(label_sorted[i], xy = (z,y+0.09), textcoords = "data")
+      y = 0.8 if min(base[i],proposed[i])<0.5 else  min(base[i],proposed[i])
+      ax_lst[num].annotate(label_sorted[i], xy = (z,y-0.15), textcoords = "data")
 
     ax_lst[num].plot(x, base, 'ko-', label='All Data')
     ax_lst[num].plot(x, proposed, 'ro-', label='Sampled with N= ' + str(samplesize[num]), color=cols[num])
     ax_lst[num].legend(fontsize='small',loc = 0)
-    ax_lst[num].set_xlim([-1, 28])
+    ax_lst[num].set_xlim([-1, 34])
     ax_lst[num].set_ylim([0, 1])
     ax_lst[num].set_yticks(np.arange(0.3, 0.9, 0.3))
   f.subplots_adjust(wspace=0, hspace=0)
-  f.text(0.04, 0.5, 'AUC Improvements', va='center', rotation='vertical', fontsize=11)
+  f.text(0.04, 0.5, 'AUC values', va='center', rotation='vertical', fontsize=11)
   plt.xlabel('Data sets, sorted by improvements')
-  plt.savefig('sample.eps', format='eps',dpi= 1000)
+  plt.savefig('./result/20160806/Small_N.eps', format='eps',dpi= 1000)
   plt.show()
 
 
