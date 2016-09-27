@@ -195,7 +195,7 @@ def addResult(result, title, new_option_result):
   return result
 
 
-def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 50]):
+def run(original_src="./dataset",   option=["-S", "S", "-T", "S","-N", 50]):
   """
   :param original_src: the original src of data set, e.g : './dataset'
   :type basestring
@@ -218,22 +218,22 @@ def run(original_src="./dataset", option=["-S", "S", "-T", "S","-EPV",20,"-N", 5
 
   """
   print(time.strftime("%a, %d %b %Y %H:%M:%S +0000"))
-  out = {"EQ": ['EQ', 0.583,0.747], "JDT": ['JDT',0.795, 0.693], "LC": ['LC',0.575, 0.638], "ML": ['ML', 0.734,0.651], "PDE": ['PDE',0.684, 0.726],
-         "apache": ['apache',0.714, 0.664], "safe": ['safe',0.706, 0.652], "zxing": ['zxing',0.605, 0.635], "ant-1.3": ['ant-1.3',0.609, 0.675],
-         "arc": ['arc', 0.670,0.701], "camel-1.0": ['camel-1.0', 0.550,0.639], "poi-1.5": ['poi-1.5',0.707, 0.547],
-         "redaktor": ['redaktor',0.744, 0.499], "skarbonka": ['skarbonka',0.569, 0.688], "tomcat": ['tomcat',0.778, 0.756],
-         "velocity-1.4": ['velocity-1.4', 0.725,0.476], "xalan-2.4": ['xalan-2.4',0.755, 0.661],
-         "xerces-1.2": ['xerces-1.2', 0.624,0.500], "JM1":["JM1",0.705,0.685],"CM1": ['CM1', 0.653,0.704], "MW1": ['MW1', 0.612,0.630], "PC1": ['PC1', 0.787,0.696],
-         "PC2":["PC2",0.748,0.884],"PC3": ['PC3', 0.794,0.730], "PC4": ['PC4',0.900, 0.668], "PC5":["PC5",0.954,0.806],"KC3":["KC3",0.609,0.678],"MC2":["MC2",0.646,0.677],
-         "ar1": ['ar1', 0.582,0.727], "ar3": ['ar3', 0.574,0.823],
-         "ar4": ['ar4',0.657, 0.798], "ar5": ['ar5',0.804, 0.902], "ar6": ['ar6',0.654, 0.667], "method": ['Target', 'WPDP','HDP-JC']}
+  out = {"EQ": ['EQ', 0.583,0.782], "JDT": ['JDT',0.795, 0.767], "LC": ['LC', 0.575, 0.655], "ML": ['ML', 0.734,0.692], "PDE": ['PDE',0.684, 0.693],
+         "apache": ['apache',0.714, 0.731], "safe": ['safe',0.706, 0.837], "zxing": ['zxing',0.605, 0.650], "ant-1.3": ['ant-1.3',0.609, 0.800],
+         "arc": ['arc', 0.670,0.701], "camel-1.0": ['camel-1.0', 0.550,0.639], "poi-1.5": ['poi-1.5',0.707, 0.723],
+         "redaktor": ['redaktor',0.744, 0.528], "skarbonka": ['skarbonka',0.569, 0.689], "tomcat": ['tomcat',0.778, 0.737],
+         "velocity-1.4": ['velocity-1.4', 0.725,0.391], "xalan-2.4": ['xalan-2.4',0.755, 0.673],
+         "xerces-1.2": ['xerces-1.2', 0.624,0.486], "JM1":["JM1",0.705,0.688],"CM1": ['CM1', 0.653,0.720], "MW1": ['MW1', 0.612,0.745], "PC1": ['PC1', 0.787,0.751],
+         "PC2":["PC2",0.748,0.893],"PC3": ['PC3', 0.794,0.738], "PC4": ['PC4',0.900, 0.681], "PC5":["PC5",0.954,0.950],"KC3":["KC3",0.609,0.678],"MC2":["MC2",0.646,0.686],
+         "ar1": ['ar1', 0.582,0.736], "ar3": ['ar3', 0.574,0.835], "MC1":["MC1",0.863,0.893],
+         "ar4": ['ar4',0.657, 0.812], "ar5": ['ar5',0.804, 0.911], "ar6": ['ar6',0.654, 0.667], "method": ['Target', 'WPDP','HDP-JC']}
   out = addResult(out, ['HDP-Scipy', 'HDP-Scipy-IQR'], repeat(KSanalyzer, original_src, []))
   for num in range(50, 250, 50):
     title = ['N-' + str(num),'N-' + str(num)+'-IQR']
     option[option.index("-N")+1] = num
     out = addResult(out, title, repeat(KSanalyzer, original_src, option))
   printout(out)
-  pickle_result = open("result.pkl","wb") # pickle results
+  pickle_result = open("result20160806_small_N.pkl","wb") # pickle results
   pickle.dump(out, pickle_result)
 
 

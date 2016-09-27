@@ -199,7 +199,8 @@ def featureSelection(data, num_of_attributes):
   """
   search = autoclass('weka.attributeSelection.Ranker')()
   # evaluator = autoclass('weka.attributeSelection.ReliefFAttributeEval')()
-  evaluator = autoclass('weka.attributeSelection.ChiSquaredAttributeEval')()
+  # evaluator = autoclass('weka.attributeSelection.ChiSquaredAttributeEval')()
+  evaluator = autoclass('weka.attributeSelection.GainRatioAttributeEval')()
   attsel = autoclass('weka.attributeSelection.AttributeSelection')()
   search.setOptions(['-N', str(num_of_attributes)])
   attsel.setSearch(search)
